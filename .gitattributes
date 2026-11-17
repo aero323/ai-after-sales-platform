@@ -1,0 +1,9 @@
+* text=auto
+
+# Generated or binary deliverables: avoid line-ending conversion and text diffs
+*.pgm binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pptx binary
+*.pdf binary

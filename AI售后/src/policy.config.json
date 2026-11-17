@@ -1,0 +1,337 @@
+{
+ "_说明": "AI 售后政策配置。这是唯一的规则事实来源（single source of truth）。改这里 = 改产品行为，不需要改代码。每一项都带 说明 / 依据 / 可改范围，业务侧可直接阅读。",
+ "version": "2026-11-05.1",
+ "autoReply": {
+  "_说明": "AI 什么时候可以自己回客户。阈值越高越保守。",
+  "threshold": {
+   "value": 85,
+   "min": 60,
+   "max": 98,
+   "unit": "%",
+   "label": "自动回复置信度阈值",
+   "_依据": "置信度 ≥ 该值且命中知识条目才允许直接回复；低于该值但高于该值减去 askBand 的，先追问客户。"
+  },
+  "askBand": {
+   "value": 25,
+   "min": 10,
+   "max": 40,
+   "unit": "个百分点",
+   "label": "追问区间宽度",
+   "_依据": "阈值减 askBand 到阈值之间走追问，而不是直接转人工。调大 = 更多问题由 AI 追问解决，人工更轻松但客户多一轮沟通。"
+  },
+  "maxAskRounds": {
+   "value": 2,
+   "min": 1,
+   "max": 4,
+   "unit": "轮",
+   "label": "AI 最多追问轮数",
+   "_依据": "追问用完仍无法判断就转品牌方售后。超过 2 轮客户体验明显变差（FWT-61 与 H5 测试都验证过）。"
+  },
+  "noMatchCap": {
+   "value": 45,
+   "min": 0,
+   "max": 100,
+   "unit": "%",
+   "label": "无知识条目时的置信度封顶",
+   "_技术约束": "不建议产品侧调高。它的含义是「我不认识这个问题，就不能因为格式很像而回」。调高等于允许 AI 编答案。",
+   "locked": true
+  }
+ },
+ "hardRules": {
+  "_说明": "以下情况无论置信度多高，一律先给人看。开关可以关，但关掉会让 AI 直接对客承诺——需业务与技术双签。",
+  "safety": {
+   "value": true,
+   "label": "涉及安全件（锁扣、钢缆、急停、承重结构）",
+   "_依据": "安全件失效可能伤人，误判成本远高于多转一次人工。"
+  },
+  "refund": {
+   "value": true,
+   "label": "客户要求退货、退款或赔偿",
+   "_依据": "涉及钱，AI 不承诺。"
+  },
+  "negative": {
+   "value": true,
+   "label": "客户情绪明显负面或提到律师、公开评价",
+   "_依据": "舆情风险，交给人处理。"
+  },
+  "b2b": {
+   "value": false,
+   "label": "客户是 B 端（企业邮箱）",
+   "_依据": "默认关闭：B 端客户也是客户，先按普通客户处理；需要区分销售渠道时再打开。"
+  }
+ },
+ "shipping": {
+  "_说明": "AI 可以主动承诺寄什么件。金额、库存、地址全部来自数据库，模型不能提供。",
+  "autoCommitLimitUsd": {
+   "value": 50,
+   "min": 0,
+   "max": 500,
+   "unit": "美元",
+   "label": "AI 可自行承诺寄件的单价上限",
+   "_依据": "超过这个金额的零件（控制板 120 美元、锁扣总成 62 美元）必须人工确认。这一项改高会直接增加品牌方的费用敞口。",
+   "locked": true
+  },
+  "smallParts": {
+   "value": true,
+   "label": "≤ 上限的小件可由 AI 直接承诺并扣库存",
+   "_依据": "螺栓包、减震垫这类小五金，寄错成本低，自动化收益高。"
+  },
+  "bigParts": {
+   "value": false,
+   "label": "> 上限的大件允许 AI 直接承诺",
+   "_依据": "默认关。打开前请确认品牌方愿意承担 AI 误判的费用。",
+   "locked": true
+  },
+  "videos": {
+   "value": true,
+   "label": "允许发送知识库中的安装视频与说明书页面",
+   "_依据": "无成本动作，打开即可。"
+  },
+  "requireTrackingWithinHours": {
+   "value": 24,
+   "min": 1,
+   "max": 168,
+   "unit": "小时",
+   "label": "发货后必须回填运单号的时限",
+   "_依据": "FWT-61 里运单拖了 4 天，品牌和消费者都在等。超过时限进「需要你的决定」。"
+  }
+ },
+ "routing": {
+  "_说明": "AI 拿不准时按顺序找人。每一级有时限，超时标红并提醒。",
+  "l1": {
+   "name": "张瑞",
+   "email": "zhang.rui@ironpeak.com",
+   "hours": {
+    "value": 4,
+    "min": 1,
+    "max": 72,
+    "unit": "小时",
+    "label": "一级响应时限（品牌方售后）"
+   },
+   "_依据": "对客承诺的「通常 4 小时内回复」就是这一条。改这里会同时改变发给客户的承诺措辞。"
+  },
+  "l2": {
+   "name": "按订单对应的工厂接口人",
+   "email": "",
+   "hours": {
+    "value": 24,
+    "min": 1,
+    "max": 168,
+    "unit": "小时",
+    "label": "二级响应时限（工厂）"
+   },
+   "_依据": "工厂跨时区、跨公司，24 小时是业务侧认可的实务值。"
+  }
+ },
+ "guard": {
+  "_说明": "流程护栏。这些值影响工单怎么合并、怎么拆，不影响对客措辞。",
+  "mergeReopenDays": {
+   "value": 7,
+   "min": 0,
+   "max": 30,
+   "unit": "天",
+   "label": "工单关闭后多久内再来信自动重新打开",
+   "_依据": "7 天内视为同一问题的延续；更久视为新问题，新开工单。"
+  },
+  "repairGuideDays": {
+   "value": 2,
+   "min": 1,
+   "max": 14,
+   "unit": "天",
+   "label": "修复优先的自修跟进窗口",
+   "_依据": "发出自修指引后 2 天没反馈就追问，避免客户被晾着（FWT-61 里消费者反馈等了 4 天）。"
+  },
+  "batchCluster": {
+   "_说明": "同批次聚集判定：同一问题在某一批次达到这个数量、且显著高于其他批次，才建议升级工厂排查。",
+   "minSame": {
+    "value": 3,
+    "min": 2,
+    "max": 20,
+    "unit": "起",
+    "label": "同批次最少起数"
+   },
+   "ratio": {
+    "value": 2,
+    "min": 1.5,
+    "max": 10,
+    "unit": "倍",
+    "label": "相对其他批次的倍数"
+   }
+  },
+  "maxIssuesPerTicket": {
+   "value": 5,
+   "min": 1,
+   "max": 10,
+   "unit": "条",
+   "label": "一封来信最多拆成几条子问题",
+   "_依据": "防止一封邮件被拆成十个工单。"
+  },
+  "maxReplyWords": {
+   "value": 220,
+   "min": 60,
+   "max": 600,
+   "unit": "词",
+   "label": "对客回复长度上限",
+   "_依据": "售后回复超过 220 词客户基本不读。LLM 生成后按此截断或要求重写。"
+  }
+ },
+ "_变更记录": [
+  {
+   "at": "2026-11-05",
+   "by": "原型初始化",
+   "note": "从原 settings 抽出：threshold / rules / promise / routes；新增 askBand、noMatchCap、mergeReopenDays、repairGuideDays、batchCluster、tracking 时限。"
+  }
+ ],
+ "hardRuleWords": {
+  "_说明": "硬规则的判定词表。来信命中任一词即触发对应规则（大小写不敏感）。规则开关在上方 hardRules；这里管'什么话算触发'。",
+  "safety": {
+   "_说明": "安全件信号分两类。伤害描述词是兜底，只求不漏；零件名可以随产品线增删。",
+   "injury": {
+    "value": [
+     "injur",
+     "hurt",
+     "injured",
+     "collapse",
+     "collapsed",
+     "fell",
+     "electrocut",
+     "burn",
+     "burned",
+     "受伤",
+     "砸",
+     "摔",
+     "触电",
+     "断裂",
+     "塌",
+     "儿童独自",
+     "儿童无人",
+     " kinderen",
+     "verletz",
+     "gerissen",
+     "herid",
+     "roto",
+     "bless",
+     "enfant seul",
+     "children alone",
+     "child alone",
+     "unattended child",
+     "unattended children",
+     "kind unbeaufsichtigt",
+     "niño solo",
+     "enfant seul sans surveillance"
+    ],
+    "locked": true,
+    "label": "伤害描述（锁定）",
+    "_依据": "这类词一旦漏判，后果是伤人事故；误判的代价只是多转一次人工。删改需技术与业务双签。"
+   },
+   "parts": {
+    "value": [
+     "safety",
+     "catch",
+     "latch",
+     "cable",
+     "fray",
+     "frayed",
+     "pulley",
+     "snapped",
+     "broke",
+     "broken",
+     "seilzug",
+     "seil",
+     "sicherheit",
+     "raste",
+     "seguro",
+     "bloqueo",
+     "cable de acero",
+     "sécurité",
+     "verrou",
+     "câble",
+     "cassé",
+     "锁扣",
+     "钢缆",
+     "钢丝",
+     "滑轮",
+     "安全锁",
+     "挂钩"
+    ],
+    "locked": false,
+    "label": "安全部件名称（可编辑）",
+    "_依据": "按产品线增删。新增型号带新的承重 / 传动部件时，把零件名加进来。"
+   }
+  },
+  "refund": {
+   "value": [
+    "refund",
+    "return",
+    "money back",
+    "chargeback",
+    "replace the whole",
+    "rückgabe",
+    "erstattung",
+    "geld zurück",
+    "reembolso",
+    "devolver",
+    "remboursement",
+    "retour",
+    "退货",
+    "退款",
+    "赔偿",
+    "换货"
+   ],
+   "locked": false,
+   "label": "退换货 / 赔偿（可编辑）",
+   "_依据": "涉及钱，命中即转人工。"
+  },
+  "negative": {
+   "value": [
+    "lawyer",
+    "attorney",
+    "review",
+    "trustpilot",
+    "facebook",
+    "instagram",
+    "unacceptable",
+    "ridiculous",
+    "terrible",
+    "scam",
+    "anwalt",
+    "bewertung",
+    "unverschämt",
+    "abogado",
+    "reseña",
+    "inaceptable",
+    "avocat",
+    "avis",
+    "inacceptable",
+    "律师",
+    "投诉",
+    "差评",
+    "曝光",
+    "垃圾"
+   ],
+   "locked": false,
+   "label": "负面情绪 / 公开渠道（可编辑）",
+   "_依据": "提及律师或公开评价意味着舆情风险，交给人处理。"
+  },
+  "b2b": {
+   "value": [
+    "gmail",
+    "yahoo",
+    "outlook",
+    "hotmail",
+    "icloud",
+    "web.de",
+    "gmx",
+    "orange.fr",
+    "telia",
+    "live.",
+    "me.com",
+    "qq.com",
+    "163.com"
+   ],
+   "locked": false,
+   "label": "免费邮箱域名（白名单）",
+   "_依据": "客户邮箱不在这个名单里，就视为企业邮箱（B 端）。仅在 hardRules.b2b 打开时生效，默认关闭。"
+  }
+ }
+}

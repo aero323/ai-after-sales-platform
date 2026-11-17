@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "build": "python3 build.py",
+    "build:h5": "python3 build.py h5",
+    "build:track": "python3 build.py track",
+    "test": "node policytest.js && node kgtest.js && node i18ntest.js && node h5test.js && node tracktest.js && node bridgetest.js && node batchtest.js && node verify_fwt61.js",
+    "test:dom": "node domtest.js"
+  },
+  "dependencies": {
+    "jsdom": "^30.1.3"
+  }
+}

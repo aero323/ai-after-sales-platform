@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>IronPeak Support · 扫码售后 H5 原型 v2</title>
+<style>
+:root{
+  color-scheme: light;
+  --brand:#0E7A6C; --brand-ink:#0B5F54; --brand-soft:#E3F3EF;
+  --ink:#171C22; --muted:#6B7682; --faint:#9AA3AE; --line:#E4E8ED; --bg:#F6F7F9; --panel:#fff;
+  --amber:#B7600A; --amber-soft:#FBEEDC; --green:#2F7D32;
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue","Segoe UI",Roboto,"Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#DDE2E8;color:var(--ink);font-size:15px;line-height:1.5;min-height:100%}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+
+/* desktop stage with phone frame */
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:48px;padding:32px 16px;flex-wrap:wrap}
+.phone{width:390px;height:844px;background:#000;border-radius:48px;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.35);position:relative;flex:none}
+.screen{width:100%;height:100%;background:var(--bg);border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:32px;background:#000;border-radius:0 0 18px 18px;z-index:5}
+.caption{max-width:300px;color:#3A4552;font-size:14px;line-height:1.6}
+.caption h2{margin:0 0 8px;font-size:18px;font-weight:600}
+.caption p{margin:0 0 10px}
+.caption .flow{margin:0;padding-left:18px}
+.caption .flow li{margin:3px 0}
+.caption .flow li.on{font-weight:600;color:var(--brand-ink)}
+.langtoggle{display:inline-flex;border:1px solid #B8C0CA;border-radius:8px;overflow:hidden;margin-bottom:16px}
+.langtoggle button{border:0;background:#fff;padding:6px 14px;font-size:13px;color:#3A4552}
+.langtoggle button.on{background:var(--brand);color:#fff}
+@media (max-width:480px){.stage{padding:0}.phone{width:100%;height:100vh;border-radius:0;padding:0;box-shadow:none}.screen{border-radius:0}.notch,.caption{display:none}}
+
+/* in-screen */
+.statusbar{height:44px;flex:none}
+.topbar{display:flex;align-items:center;gap:10px;padding:6px 18px 10px;flex:none}
+.topbar .logo{width:28px;height:28px;border-radius:7px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700}
+.topbar b{font-weight:600;font-size:15px}
+.topbar .sp{flex:1}
+.topbar .lang{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:12px;padding:3px 10px;background:#fff;cursor:pointer}
+.topbar .reset{width:28px;height:28px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--muted);display:grid;place-items:center;flex:none;padding:0;transition:background .15s,color .15s,transform .15s}
+.topbar .reset:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.topbar .reset:active{transform:rotate(-24deg)}
+.back{border:0;background:none;padding:4px;margin-left:-6px;color:var(--ink);display:none}
+.back.show{display:block}
+.prog{height:3px;background:var(--line);margin:0 18px 0;border-radius:2px;overflow:hidden;flex:none}
+.prog i{display:block;height:100%;background:var(--brand);width:0;transition:width .3s}
+@media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+.stepnote{font-size:12px;color:var(--faint);padding:6px 18px 0;flex:none;min-height:24px}
+.view{flex:1;overflow:auto;padding:20px 18px 24px;display:none;flex-direction:column}
+.view.show{display:flex}
+h1{font-size:24px;font-weight:600;line-height:1.25;margin:10px 0 8px;letter-spacing:-.01em}
+.lead{color:var(--muted);margin:0 0 18px}
+.btn{width:100%;border:0;border-radius:12px;padding:15px 16px;font-size:16px;font-weight:600;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{background:var(--brand-ink)}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.link{background:none;color:var(--brand);font-weight:500;padding:10px}
+.btn + .btn{margin-top:10px}
+.spacer{flex:1}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.card + .card{margin-top:10px}
+.prod{display:flex;gap:14px;align-items:center}
+.prod .img{width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,#E8ECF0,#CBD2DA);flex:none;display:grid;place-items:center}
+.prod b{display:block;font-size:16px}
+.prod span{color:var(--muted);font-size:13px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:left;width:100%}
+.opt:active,.opt.on{border-color:var(--brand);background:var(--brand-soft)}
+.opt .n{font-weight:600}
+.opt .s{color:var(--muted);font-size:13px;margin-left:auto}
+.opt .flag{width:28px;height:20px;border-radius:3px;flex:none;background:#CBD2DA}
+.finder{position:relative;background:#1B2129;border-radius:16px;aspect-ratio:3/4;display:grid;place-items:center;overflow:hidden}
+.finder .frame{position:absolute;inset:36px 28px;border:2px solid rgba(255,255,255,.75);border-radius:10px}
+.finder .frame::before,.finder .frame::after{content:"";position:absolute;width:26px;height:26px;border:3px solid #fff}
+.finder .frame::before{top:-3px;left:-3px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+.finder .frame::after{bottom:-3px;right:-3px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+.finder .label{width:200px;background:#F3F5F7;border-radius:4px;padding:10px 12px;font-size:10px;color:#333;line-height:1.5;transform:rotate(-3deg);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.finder .label b{display:block;font-size:12px}
+.finder .label .bars{height:18px;margin:6px 0 3px;background:repeating-linear-gradient(90deg,#222 0 2px,transparent 2px 4px,#222 4px 5px,transparent 5px 8px)}
+.finder .hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;font-size:13px;opacity:.9}
+.finder .scanning{position:absolute;left:28px;right:28px;height:2px;background:var(--brand);box-shadow:0 0 12px var(--brand);top:36px;animation:scan 1.4s linear infinite;display:none}
+.finder.busy .scanning{display:block}
+@keyframes scan{0%{top:36px}100%{top:calc(100% - 36px)}}
+@media (prefers-reduced-motion:reduce){.finder .scanning{animation:none}}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;font-size:14px}
+.kv span:nth-child(odd){color:var(--muted)}
+.ok{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:600;font-size:13px}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:12px;padding-bottom:8px}
+.msg{max-width:88%;padding:11px 14px;border-radius:16px;line-height:1.5;font-size:15px;white-space:pre-wrap}
+.msg.ai{background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px;align-self:flex-start}
+.msg.me{background:var(--brand);color:#fff;border-bottom-right-radius:6px;align-self:flex-end}
+.msg .meta{font-size:11px;color:var(--faint);margin-top:4px}
+.stepcard{align-self:flex-start;max-width:88%;background:#fff;border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:6px;overflow:hidden}
+.stepcard .pic{aspect-ratio:16/9;background:linear-gradient(135deg,#E8ECF0,#CBD2DA);display:grid;place-items:center;color:#3A4552;font-size:13px;position:relative}
+.stepcard button.pic{width:100%;border:0;padding:0;font:inherit;cursor:pointer;appearance:none}
+.stepcard .video-poster{background:linear-gradient(135deg,#1F2A30,#3A4A50)}
+.stepcard .video-badge{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.94);color:var(--brand-ink);padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.02em}
+.stepcard .pic .play{width:44px;height:44px;border-radius:50%;background:rgba(23,28,34,.75);display:grid;place-items:center;color:#fff}
+.stepcard .pic small{position:absolute;right:8px;bottom:8px;background:rgba(23,28,34,.75);color:#fff;padding:2px 6px;border-radius:4px;font-size:11px}
+.stepcard .body{padding:12px 14px;font-size:14px}
+.stepcard .video-copy{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 10px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+.stepcard .body b{display:block;margin-bottom:4px}
+.stepcard ol{margin:6px 0 0;padding-left:18px}
+.stepcard li{margin:3px 0}
+.quick{display:flex;gap:8px;flex-wrap:wrap;align-self:flex-start}
+.quick button{border:1px solid var(--brand);color:var(--brand-ink);background:#fff;border-radius:18px;padding:7px 13px;font-size:14px}
+.typing{align-self:flex-start;display:inline-flex;gap:4px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:6px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--faint);animation:bl 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.composer{flex:none;display:flex;gap:8px;align-items:flex-end;padding:10px 14px 24px;background:#fff;border-top:1px solid var(--line)}
+.composer textarea{flex:1;border:1px solid var(--line);border-radius:20px;padding:10px 14px;resize:none;outline:none;max-height:90px;font-size:15px;background:var(--bg)}
+.composer .ic{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--muted);flex:none}
+.composer .send{background:var(--brand);color:#fff;border:0}
+.composer .send:disabled{background:#CBD2DA}
+.composer .voice-main{flex:1;min-width:0;height:40px;border:1px solid var(--brand);border-radius:20px;background:var(--brand-soft);color:var(--brand-ink);display:flex;align-items:center;gap:8px;padding:0 11px;text-align:left}
+.composer .voice-main .voice-symbol{width:25px;height:25px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none}
+.composer .voice-main .voice-text{min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.composer .voice-main .voice-text b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.composer .voice-main .voice-text small{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.composer .voice-wave{margin-left:auto;display:flex;align-items:center;gap:2px;height:18px;flex:none}
+.composer .voice-wave i{display:block;width:2px;height:5px;border-radius:2px;background:var(--brand);opacity:.35}
+.composer .voice-main.recording{background:#FDECEC;border-color:#EFB3B3;color:#A32626;animation:voicepulse 1.2s ease-in-out infinite}
+.composer .voice-main.recording .voice-symbol{background:#B42323}
+.composer .voice-main.recording .voice-wave i{opacity:1;animation:wavebar .7s ease-in-out infinite}
+.composer .voice-main.recording .voice-wave i:nth-child(2){animation-delay:.12s}
+.composer .voice-main.recording .voice-wave i:nth-child(3){animation-delay:.24s}
+.composer.text-mode .voice-main{display:none}
+.composer:not(.text-mode) textarea{display:none}
+@keyframes voicepulse{0%,100%{box-shadow:0 0 0 0 rgba(180,35,35,.15)}50%{box-shadow:0 0 0 7px rgba(180,35,35,0)}}
+@keyframes wavebar{0%,100%{height:5px}50%{height:15px}}
+.pm-note-anchor{position:relative;width:40px;height:40px;flex:none}
+.pm-note-anchor>.ic{width:40px;height:40px}
+.pm-note-badge{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border:2px solid #fff;border-radius:50%;background:#E56A2A;color:#fff;font-size:10px;font-weight:700;line-height:1;padding:0;display:grid;place-items:center;cursor:help;z-index:3;box-shadow:0 2px 7px rgba(32,38,45,.22)}
+.pm-note-tip{position:absolute;left:-2px;bottom:calc(100% + 10px);width:max-content;max-width:180px;padding:8px 10px;border-radius:8px;background:#20262D;color:#fff;font-size:12px;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .15s,transform .15s,visibility .15s;pointer-events:none;z-index:9999}
+.pm-note-tip::after{content:"";position:absolute;left:15px;top:100%;border:6px solid transparent;border-top-color:#20262D}
+.pm-note-anchor:hover .pm-note-tip,.pm-note-anchor:focus-within .pm-note-tip{opacity:1;visibility:visible;transform:translateY(0)}
+.sysnote{text-align:center;color:var(--faint);font-size:12px;margin:4px 0}
+.human{align-self:center;background:var(--amber-soft);color:#6B3A05;border-radius:12px;padding:8px 14px;font-size:13px;text-align:center}
+.done-icon{width:64px;height:64px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;margin:16px 0 8px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fff;outline:none;font-size:16px}
+.inp:focus{border-color:var(--brand)}
+.stars{display:flex;gap:6px;margin:4px 0 14px}
+.stars button{border:0;background:none;font-size:28px;color:#CBD2DA;padding:0}
+.stars button.on{color:#E0A100}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:#1C232B;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;z-index:9;white-space:nowrap;pointer-events:none;max-width:90%;white-space:normal;text-align:center}
+.toast.show{opacity:1}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#171C22;opacity:.25}
+
+/* ---- v2 ---- */
+.finder.hasimg{background-size:cover;background-position:center}
+.finder.hasimg .label{display:none}
+.finder.hasimg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.15)}
+.err{color:#B42323;font-size:13px;min-height:18px;margin-top:6px}
+.snentry{display:none;margin-top:12px}
+.row-sp{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500}
+.tag.ai{background:var(--brand-soft);color:var(--brand-ink)} .tag.human,.tag.factory{background:var(--amber-soft);color:var(--amber)} .tag.done{background:#E6F2E6;color:#2F7D32}
+.man{border-bottom:1px solid var(--line);padding:10px 0}
+.man summary{cursor:pointer;font-weight:600}
+.man ol{margin:8px 0 4px;padding-left:18px;font-size:14px;color:#2B333C}
+.manual-video{width:100%;display:grid;grid-template-columns:76px 1fr;align-items:center;gap:11px;border:1px solid #DCE3E8;border-radius:12px;padding:8px;margin:10px 0;background:linear-gradient(135deg,#F7FAFB,#EDF2F4);text-align:left;color:var(--ink)}
+.manual-video .thumb{height:52px;border-radius:8px;background:linear-gradient(135deg,#202A30,#405158);display:grid;place-items:center;color:#fff;position:relative;overflow:hidden}
+.manual-video .thumb svg{width:24px;height:24px;padding-left:2px;border-radius:50%;background:rgba(255,255,255,.16)}
+.manual-video .duration{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:4px;font-size:9px}
+.manual-video .copy b{display:block;font-size:13px;margin-bottom:2px}
+.manual-video .copy small{font-size:11px;color:var(--muted)}
+.doc-view.show{padding:0;overflow:hidden;background:#EEF1F3}
+.doc-scroll{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 18px;-webkit-overflow-scrolling:touch}
+.doc-paper{background:#fff;border:1px solid #E0E5E9;border-radius:16px;padding:20px 17px;box-shadow:0 8px 24px rgba(27,33,41,.06)}
+.doc-cover{padding-bottom:16px;border-bottom:1px solid var(--line)}
+.doc-kicker{display:inline-flex;align-items:center;gap:5px;color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.04em}
+.doc-paper h1{font-family:"Songti SC","Noto Serif SC",Georgia,serif;font-size:22px;line-height:1.3;margin:10px 0 6px}
+.doc-paper h2{font-family:"Songti SC","Noto Serif SC",Georgia,serif;font-size:18px;margin:0 0 6px}
+.doc-paper h3{font-size:12px;color:var(--muted);margin:14px 0 6px;letter-spacing:.03em}
+.doc-paper p{font-size:13px;color:var(--muted);margin:0}
+.doc-toc{display:flex;flex-direction:column;gap:5px;margin-top:14px}
+.doc-toc button{border:0;background:#F5F7F8;border-radius:8px;padding:8px 10px;text-align:left;color:#34404A;font-size:12px}
+.doc-section{padding:18px 0;border-bottom:1px solid var(--line)}
+.doc-section:last-child{border-bottom:0}
+.doc-section .doc-section-count{font-size:10px;color:var(--faint);font-weight:700;letter-spacing:.08em;margin-bottom:5px}
+.doc-section ol{margin:8px 0 12px;padding-left:20px;font-size:13px;line-height:1.65;color:#2B333C}
+.doc-note{background:#F5F8F7;border-left:3px solid var(--brand);border-radius:0 8px 8px 0;padding:9px 10px;font-size:12px;color:#4D5B62;line-height:1.55}
+.doc-footer{padding-top:16px;font-size:11px;color:var(--faint);text-align:center}
+.doc-chat-panel{flex:none;border-top:1px solid var(--line);background:#fff;padding:9px 12px 19px;box-shadow:0 -8px 24px rgba(27,33,41,.07)}
+.doc-chat-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.doc-chat-head b{display:block;font-size:12px}
+.doc-chat-head span{display:block;font-size:10px;color:var(--faint)}
+.doc-chat-list{max-height:98px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin:7px 0}
+.doc-msg{max-width:92%;padding:7px 10px;border-radius:11px;font-size:12px;line-height:1.5}
+.doc-msg.ai{background:var(--bg);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.doc-msg.user{background:var(--brand);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.doc-msg.typing{color:var(--muted)}
+.doc-composer{display:flex;gap:7px;align-items:center}
+.doc-composer input{flex:1;min-width:0;border:1px solid var(--line);border-radius:18px;padding:9px 12px;background:var(--bg);outline:none;font-size:13px}
+.doc-composer input:focus{border-color:var(--brand)}
+.doc-composer button{width:36px;height:36px;border:0;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none}
+.manual-support-link{margin:10px auto 0;border:0;background:none;color:var(--muted);font-size:12px;text-decoration:underline;text-underline-offset:3px;padding:5px 8px}
+.manual-support-link:hover{color:var(--brand-ink)}
+.muted{color:var(--muted)} .small{font-size:12px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="caption">
+    <div class="langtoggle"><button id="tg-zh" onclick="setLang('zh')">中文</button><button id="tg-en" onclick="setLang('en')">English</button></div>
+    <h2 data-i="cap_title"></h2>
+    <p data-i="cap_p"></p>
+    <ol class="flow" id="flow"></ol>
+    <p style="margin-top:14px;font-size:12px;color:#6B7682" data-i="cap_hint"></p>
+  </div>
+
+  <div class="phone"><div class="notch"></div><div class="screen" id="screen">
+    <div class="statusbar"></div>
+    <div class="topbar">
+      <button class="back" id="back" onclick="goBack()" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="logo">IP</div><b data-i="brand"></b><div class="sp"></div><button class="lang" id="langBadge" onclick="setLang(ui==='zh'?'en':'zh')" title="切换语言 / Switch language">ZH</button><button class="reset" id="resetDemo" onclick="resetDemo()" aria-label="重置演示" title="重置演示"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="prog"><i id="prog"></i></div>
+    <div class="stepnote" id="stepnote"></div>
+
+    <!-- 0 language -->
+    <section class="view show" data-v="0">
+      <h1 data-i="h1"></h1>
+      <p class="lead" data-i="l1"></p>
+      <div class="opts" id="langs"></div>
+    </section>
+
+    <!-- 1 landing -->
+    <section class="view" data-v="1">
+      <div class="card prod"><div class="img"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#3A4552" stroke-width="1.6"><path d="M4 4v16M20 4v16M4 12h16M7 9h2v6H7zM15 9h2v6h-2z"/></svg></div><div><b data-i="prod"></b><span data-i="prod_sub"></span></div></div>
+      <h1 data-i="h0"></h1>
+      <p class="lead" data-i="l0"></p>
+      <div class="opts">
+        <button class="opt" onclick="go(2)"><span class="n" data-i="o1"></span><span class="s">→</span></button>
+        <button class="opt" onclick="go('m')"><span class="n" data-i="o2"></span><span class="s">→</span></button>
+        <button class="opt" onclick="go('t')"><span class="n" data-i="o3"></span><span class="s">→</span></button>
+      </div>
+      <div class="spacer"></div>
+      <p class="sysnote" data-i="note0"></p>
+    </section>
+
+    <!-- 2 label -->
+    <section class="view" data-v="2">
+      <h1 id="t2"></h1>
+      <p class="lead" id="l2"></p>
+      <div class="finder" id="finder">
+        <div class="frame"></div><div class="scanning"></div>
+        <div class="label"><b>IronPeak Fitness · <span data-i="prod"></span></b>220 kg max load<div class="bars"></div>S/N ····-···-····· · Made in China</div>
+        <div class="hint" id="hint"></div>
+      </div>
+      <div id="labelResult" style="display:none;margin-top:14px" class="card"></div>
+      <div class="snentry" id="snEntry"><input class="inp" id="snInput" autocapitalize="characters" onkeydown="if(event.key==='Enter')checkSn()"><div class="err" id="snErr"></div><button class="btn" onclick="checkSn()" data-i="b_check"></button></div>
+      <div class="spacer"></div>
+      <div id="labelActions">
+        <label class="btn" style="cursor:pointer"><input type="file" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span data-i="b_snap"></span></label>
+        <button class="btn link" onclick="showSnEntry()" data-i="b_type"></button>
+        <button class="btn link" style="color:var(--muted);font-weight:400" onclick="skipLabel()" data-i="b_skip_label"></button>
+      </div>
+      <!-- 不再有分类表单：拍完标签直接开始咨询，工单在客户打第一个字之前就建好 -->
+      <div id="labelConfirm" style="display:none">
+        <button class="btn" onclick="startChat()" data-i="b_start"></button>
+        <button class="btn link" onclick="resetLabel()" data-i="b_retake"></button>
+      </div>
+    </section>
+
+    <!-- 3 chat（进来即建单，开场就告知已建单并抄送人工） -->
+    <section class="view" data-v="3" style="padding:14px 14px 0">
+      <div class="chat" id="chat"></div>
+    </section>
+
+    <!-- 4 wrap-up -->
+    <section class="view" data-v="4">
+      <div class="done-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h1 id="h5title"></h1>
+      <p class="lead" data-i="l5"></p>
+      <div id="emailBlock"><div class="field"><label data-i="k_email"></label><input class="inp" type="email" id="email"></div>
+      <button class="btn" onclick="saveEmail()" data-i="b_save"></button></div>
+      <button class="btn sec" id="appBtn" style="margin-top:10px" onclick="toast('App Store / Google Play')" data-i="b_app"></button>
+      <div class="spacer"></div>
+      <div class="field"><label data-i="k_rate"></label><div class="stars" id="stars"></div></div>
+    </section>
+
+    <!-- m manual -->
+    <section class="view" data-v="m">
+      <h1 data-i="h_manual"></h1>
+      <p class="lead" data-i="l_manual"></p>
+      <div id="manualList"></div>
+      <div class="spacer"></div>
+      <button class="btn sec" onclick="openManualDoc()" data-i="b_pdf"></button>
+      <button class="manual-support-link" onclick="contactSupportFromManual()" data-i="manual_contact"></button>
+    </section>
+
+    <!-- d full manual document + AI reader -->
+    <section class="view doc-view" data-v="d">
+      <div class="doc-scroll" id="docScroll"><div class="doc-paper" id="manualDoc"></div></div>
+      <div class="doc-chat-panel">
+        <div class="doc-chat-head"><div><b data-i="doc_ai_title"></b><span data-i="doc_ai_hint"></span></div><span class="tag ai">AI</span></div>
+        <div class="doc-chat-list" id="manualChat"></div>
+        <div class="doc-composer"><input id="manualAsk" onkeydown="if(event.key==='Enter')askManual()"><button id="manualAskBtn" onclick="askManual()" aria-label="发送问题"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 19V5 M5 12l7-7 7 7"/></svg></button></div>
+      </div>
+    </section>
+
+    <!-- t track -->
+    <section class="view" data-v="t">
+      <h1 data-i="h_track"></h1>
+      <p class="lead" data-i="l_track"></p>
+      <div class="field"><input class="inp" id="trackInput" autocapitalize="characters" onkeydown="if(event.key==='Enter')track()"></div>
+      <button class="btn" onclick="track()" data-i="b_track"></button>
+      <div id="trackResult" style="margin-top:14px"></div>
+    </section>
+
+    <div class="composer" id="composer" style="display:none">
+      <div class="pm-note-anchor">
+        <label class="ic" aria-label="添加图片或视频" style="cursor:pointer"><input type="file" accept="image/*,video/*" style="display:none" onchange="onChatMedia(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label>
+        <button type="button" class="pm-note-badge" aria-label="查看研发脚注" aria-describedby="attach-media-note">注</button>
+        <span class="pm-note-tip" id="attach-media-note" role="tooltip">这里可以选视频</span>
+      </div>
+      <textarea id="ta" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+      <button class="voice-main" id="voiceBtn" onclick="toggleVoice()" aria-label="点按说话" aria-pressed="false"><span class="voice-symbol"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></span><span class="voice-text"><b id="voiceTitle">点按说话</b><small id="voiceHint">说说您遇到的问题</small></span><span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i></span></button>
+      <button class="ic keyboard" id="keyboardBtn" onclick="toggleInputMode()" aria-label="切换键盘输入"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M6 10h1M10 10h1M14 10h1M18 10h.01M6 14h2M10 14h4M16 14h2"/></svg></button>
+      <button class="ic send" onclick="sendMsg()" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 19V5 M5 12l7-7 7 7"/></svg></button>
+    </div>
+    <div class="toast" id="toast"></div>
+    <div class="home-indicator"></div>
+  </div></div>
+</div>
+<script>

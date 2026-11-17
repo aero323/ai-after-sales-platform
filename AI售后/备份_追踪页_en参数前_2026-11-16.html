@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>IronPeak Support · Your requests</title>
+<style>
+/* ================= 客户追踪页 · 视觉令牌（设计 §6） ================= */
+:root{
+  color-scheme: light;
+  --brand:#0E7A6C; --brand-ink:#0B5F54; --brand-soft:rgba(14,122,108,.12);
+  --ink:#171C22; --muted:#59646F; --faint:#626D78;
+  --bg:#F4F5F2; --panel:#fff; --line:#E5E8E2; --rail:#DDE2DB;
+  --amber:#A55308; --amber-soft:#FBEEDC; --green:#276B2A; --green-soft:#E6F2E6; --red:#B42323; --red-soft:#FCEDEC;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r-lg:16px; --r-md:12px;
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue","Segoe UI",Roboto,"Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;min-height:100%}
+body{color:var(--ink);font-size:15px;line-height:1.55;
+  background-color:var(--bg);
+  /* 信纸质感：极淡的纸纹噪点 + 顶部一层暖光（内联 SVG，无外链） */
+  background-image:
+    radial-gradient(120% 60% at 50% -10%,rgba(255,255,255,.75),rgba(255,255,255,0) 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .33 0 0 0 0 .28 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment:fixed,scroll;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 45%,#fff);outline-offset:2px;border-radius:6px}
+
+/* ---------- 顶栏（粘性 + 毛玻璃） ---------- */
+.top{position:sticky;top:0;z-index:20;background:rgba(244,245,242,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(221,226,219,.7)}
+.top .in{max-width:640px;margin:0 auto;padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.brandmark{display:flex;align-items:center;gap:9px;text-decoration:none;min-width:0;min-height:44px}
+.brandmark i{width:12px;height:12px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 4px var(--brand-soft);flex:none}
+.brandmark b{font-size:15px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.top .sp{flex:1}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.live i{width:7px;height:7px;border-radius:50%;background:#5DB38A;position:relative}
+.live.pulse i::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid #5DB38A;animation:pulse .9s ease-out 1 both}
+@keyframes pulse{from{opacity:.9;transform:scale(.4)}to{opacity:0;transform:scale(1.4)}}
+.langs{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:#fff;padding:2px}
+.langs button{border:0;background:none;font-size:12px;line-height:1;min-width:44px;min-height:44px;padding:6px;border-radius:999px;color:var(--muted);font-weight:550}
+.langs button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+/* 数据真正变化时只在页面内短暂出现，手机顶部不显示长状态文案 */
+.update-flag{width:max-content;max-width:calc(100% - 36px);margin:8px auto 0;padding:5px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand-ink);font-size:12.5px;font-weight:600;line-height:1.35;text-align:center}
+
+/* ---------- 版心 ---------- */
+main{max-width:640px;margin:0 auto;padding:22px 18px 40px}
+.demo-bar{max-width:640px;margin:0 auto;padding:8px 18px 0;font-size:12px;color:var(--amber)}
+.demo-bar a{color:var(--amber);font-weight:600}
+h1{font-size:22px;line-height:1.25;letter-spacing:-.02em;font-weight:680;margin:0}
+h2{font-size:17px;line-height:1.3;letter-spacing:-.01em;font-weight:650;margin:0}
+.hello{margin:4px 0 22px}
+.hello h1{font-size:26px;letter-spacing:-.03em}
+.hello p{margin:6px 0 0;color:var(--muted)}
+.who{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px 4px 9px}
+.who svg{flex:none}
+.sec{margin-top:26px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px}
+.sec-h .n{font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums}
+
+/* ---------- 状态胶囊（颜色 + 文字） ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;line-height:1;padding:6px 10px 6px 8px;border-radius:999px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st-ai{--s-bg:var(--brand-soft);--s-fg:var(--brand-ink)}
+.st-guiding,.st-human,.st-factory{--s-bg:var(--amber-soft);--s-fg:var(--amber)}
+.st-done{--s-bg:var(--green-soft);--s-fg:var(--green)}
+.st-late{--s-bg:var(--red-soft);--s-fg:var(--red)}
+.pill{background:var(--s-bg);color:var(--s-fg)}
+
+/* ---------- 列表卡片 ---------- */
+.cards{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.tcard{display:grid;grid-template-columns:minmax(0,1fr) 18px;gap:6px 12px;align-items:center;text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 14px 13px 16px;box-shadow:0 1px 0 rgba(23,28,34,.03);transition:border-color .15s,box-shadow .15s,transform .15s}
+.tcard:hover{border-color:#CBD3C9;box-shadow:0 6px 18px rgba(23,28,34,.06)}
+.tcard:active{transform:scale(.995)}
+.tcard .l1{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.tcard .l1 b{font-size:15.5px;font-weight:650;letter-spacing:-.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tcard .iss{margin:4px 0 0;color:#3B4550;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tcard .trk{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:12.5px;color:var(--brand-ink);background:var(--brand-soft);border-radius:8px;padding:4px 9px}
+.tcard .meta{display:flex;flex-wrap:wrap;gap:2px 10px;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
+.tcard .meta .upd{margin-left:auto;color:var(--faint)}
+.tcard .chev{grid-column:2;grid-row:1 / span 3;color:var(--faint);align-self:center}
+.tcard.done{background:rgba(255,255,255,.62)}
+.tcard.done .l1 b,.tcard.done .iss{color:var(--muted)}
+.stars{display:inline-flex;gap:1px;color:#D99A1E;vertical-align:-2px}
+.stars .off{color:#D9DDD6}
+.fold{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:rgba(255,255,255,.55);border-radius:var(--r-md);padding:12px 14px;font-size:14.5px;font-weight:600;color:var(--ink);text-align:left}
+.fold svg{transition:transform .18s;color:var(--muted)}
+.fold[aria-expanded="true"] svg{transform:rotate(180deg)}
+.fold + .cards{margin-top:10px}
+
+/* ---------- 详情：头部 / 状态横幅 ---------- */
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;min-height:32px}
+.backlink{display:inline-flex;align-items:center;gap:4px;text-decoration:none;font-size:14px;color:var(--muted);padding:6px 8px 6px 2px;margin-left:-2px;border-radius:8px;min-height:44px}
+.backlink:hover{color:var(--ink)}
+.tid{font-size:12.5px;color:var(--muted);text-align:right}
+.tid .mono{color:var(--ink);font-size:13px}
+.tid .who-inline{display:block;font-size:11.5px;color:var(--faint);margin-top:2px}
+.banner{border-radius:var(--r-lg);padding:18px 18px 17px;background:var(--s-bg);color:var(--ink);position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--s-fg) 14%,transparent)}
+.banner::after{content:"";position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);pointer-events:none}
+.banner .k{font-size:11.5px;font-weight:650;letter-spacing:.02em;color:var(--s-fg);display:flex;align-items:center;gap:7px}
+.banner .k::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--s-fg);box-shadow:0 0 0 4px color-mix(in srgb,var(--s-fg) 16%,transparent)}
+.banner h1{margin:10px 0 6px}
+.banner .now{margin:0;font-size:15px}
+.banner .now b{font-weight:650}
+.banner .promise{margin:10px 0 0;display:flex;gap:9px;align-items:flex-start;background:rgba(255,255,255,.66);border-radius:var(--r-md);padding:10px 12px;font-size:14px}
+.banner .promise svg{flex:none;margin-top:2px;color:var(--s-fg)}
+.banner .promise b{font-weight:650}
+@media (prefers-reduced-motion:no-preference){.banner.enter{animation:rise .18s ease-out both}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.issue{margin:14px 0 0;padding:12px 14px;border-left:3px solid var(--rail);background:rgba(255,255,255,.55);border-radius:0 var(--r-md) var(--r-md) 0;font-size:14px;color:#3B4550;overflow-wrap:anywhere}
+.issue small{display:block;font-size:11.5px;color:var(--faint);margin-bottom:2px}
+
+/* ---------- 进度轨道 ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 16px 6px}
+.track{list-style:none;margin:12px 0 0;padding:0}
+.track li{position:relative;padding:0 0 16px 26px;font-size:13.5px;line-height:1.45}
+.track li::before{content:"";position:absolute;left:4.5px;top:12px;bottom:-2px;width:1px;background:var(--rail)}
+.track li:last-child::before{display:none}
+.track li.future::before{background:none;border-left:1px dashed var(--rail)}
+.track .dot{position:absolute;left:0;top:4px;width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.track li.current .dot{box-shadow:0 0 0 6px var(--brand-soft)}
+.track li.current.warn .dot{background:var(--amber);box-shadow:0 0 0 6px var(--amber-soft)}
+.track li.current.late .dot{background:var(--red);box-shadow:0 0 0 6px var(--red-soft)}
+.track li.future .dot{background:#fff;border:1.5px solid #BFC7BC}
+.track li.is-new{background:var(--brand-soft);border-radius:10px;box-shadow:0 0 0 6px var(--brand-soft)}
+@media (prefers-reduced-motion:no-preference){.track li.is-new{animation:newStep 1.8s ease-out 1 both}}
+@keyframes newStep{0%{background:var(--brand-soft);box-shadow:0 0 0 6px var(--brand-soft)}100%{background:transparent;box-shadow:0 0 0 6px transparent}}
+.track b{font-weight:620;display:block}
+.track li.future b{color:var(--muted);font-weight:560}
+/* 一句话概括：夹在标题和时间之间，比标题轻、比时间重；最多两行，超出不截断（内容本就短） */
+.track .desc{display:block;font-size:13px;line-height:1.45;color:var(--muted);margin:1px 0 3px;text-wrap:pretty;overflow-wrap:anywhere}
+.track li.current .desc{color:var(--ink)}
+.track .when{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+
+/* ---------- 寄件卡 ---------- */
+.ship{margin-top:12px}
+.ship .parts{margin:8px 0 2px;font-size:14px;overflow-wrap:anywhere}
+.ship .dest{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.srows{margin:12px 0 10px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.srow{display:grid;grid-template-columns:18px 92px minmax(0,1fr);gap:10px;align-items:center;padding:10px 12px;font-size:13.5px}
+.srow + .srow{border-top:1px solid var(--line)}
+.srow .ic{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff}
+.srow.wait .ic{background:#fff;border:1.5px dashed #BFC7BC;color:transparent}
+.srow .lb{color:var(--muted);font-size:12.5px}
+.srow .v{min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.srow.wait .v{color:var(--faint)}
+.trackno{font-size:15px;font-weight:600;letter-spacing:.02em}
+.copy{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 9px;font-size:12px;color:var(--ink);min-height:44px}
+.copy:hover{border-color:#C9D0C6}
+.copy.done{color:var(--green);border-color:#BFDCC0;background:var(--green-soft)}
+
+/* ---------- 对话 ---------- */
+.convo{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.msg{max-width:86%;display:flex;flex-direction:column}
+.msg .bub{padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg .by{font-size:11.5px;color:var(--faint);margin:4px 4px 0}
+.msg.ai{align-self:flex-start}
+.msg.ai .bub{background:#fff;border:1px solid var(--line);border-top-left-radius:5px}
+.msg.cust{align-self:flex-end;align-items:flex-end}
+.msg.cust .bub{background:var(--brand-soft);color:#0F2E2A;border-top-right-radius:5px}
+.older{align-self:center;display:inline-flex;align-items:center;justify-content:center;border:1px dashed #CBD3C9;background:rgba(255,255,255,.6);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--muted);min-height:44px}
+.empty-line{font-size:13.5px;color:var(--faint);margin:10px 0 12px}
+
+/* ---------- 评分 / 操作 ---------- */
+.rate{display:flex;align-items:center;gap:10px;font-size:14px}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:26px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:var(--r-md);padding:14px 16px;font-size:15.5px;font-weight:620;text-decoration:none;background:var(--brand);color:#fff;transition:background .15s}
+.btn:hover{background:var(--brand-ink)}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.sec:hover{background:#FAFBF9}
+.more{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding:13px 14px;border-radius:var(--r-md);text-decoration:none;background:rgba(255,255,255,.55);border:1px solid var(--line);font-size:14.5px;font-weight:600}
+.more span{color:var(--muted);font-weight:500;font-size:13px}
+.foot{margin-top:30px;font-size:12px;color:var(--faint);text-align:center;line-height:1.6}
+
+/* ---------- 滚动后的邮件回复条 ---------- */
+body.has-reply-dock{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+.reply-dock{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;width:min(calc(100% - 24px),616px);padding:8px;background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(23,28,34,.14);opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,calc(100% + 24px));transition:opacity .16s ease-out,transform .16s ease-out,visibility 0s linear .16s}
+.reply-dock.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0);transition-delay:0s}
+.reply-dock .btn{min-height:48px}
+
+/* ---------- 过期 / 空态 / 演示选择器 ---------- */
+.gate{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px 20px;margin-top:8px}
+.gate .ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--amber-soft);color:var(--amber);margin-bottom:14px}
+.gate.ok .ico{background:var(--brand-soft);color:var(--brand-ink)}
+.gate p{color:var(--muted);margin:8px 0 18px}
+.inp{width:100%;border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;background:#fff;font-size:16px;outline:none}
+.inp:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.gate form{display:flex;flex-direction:column;gap:10px}
+.err{color:var(--red);font-size:13px;min-height:1em;margin:0}
+.note{font-size:12px;color:var(--faint);margin:12px 0 0}
+.picker{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.picker a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:11px 14px}
+.picker a:hover{border-color:#C9D0C6}
+.picker .em{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picker .ex{font-size:12px;color:var(--muted);grid-column:1}
+.picker .cnt{grid-column:2;grid-row:1 / span 2;display:flex;gap:6px}
+.picker .cnt span{font-size:12px;border-radius:999px;padding:3px 8px;background:#F1F3EF;color:var(--muted);white-space:nowrap}
+.picker .cnt span.on{background:var(--amber-soft);color:var(--amber)}
+
+@media (min-width:700px){ main{padding-top:34px} .hello h1{font-size:30px} }
+@media (max-width:480px){ .live span{display:none} }
+@media (max-width:360px){
+  .live{display:none}
+  .top .in{gap:8px;padding-left:14px;padding-right:14px}
+  .langs button{min-width:40px}
+}
+@media (max-width:380px){
+  .srow{grid-template-columns:18px 76px minmax(0,1fr)}
+  .tcard .l1{flex-wrap:wrap;justify-content:flex-start}
+  .tcard .l1 b{flex:1 0 100%}
+  .tcard .pill{margin-top:4px}
+  .tcard .iss{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+}
+@media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="announce" class="sr" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   政策层 · policy.js
+   作用：把所有"业务判断"集中到这里，代码只调用 Policy.xxx()，不再散落魔法数字。
+   读法：默认值来自 policy.config.json（构建时内联到 __POLICY_DEFAULTS）；
+        运行时覆盖值来自 state.policy（保存在浏览器），每条改名都进审计日志。
+   约束：这里的函数必须是纯函数（输入 → 输出），不调用模型、不发网络请求，可单测。
+
+   与 LLM 的分工（见《LLM嵌入方案》§7）：
+     LLM 输出 Proposal（我建议……）
+     Policy 输出 Decision（执行……）
+     LLM 永远够不到 Policy。
+   ============================================================ */
+// 默认值：Node 里直接读同目录 policy.config.json；浏览器构建时 build.py 会把下面这行替换成配置字面量。
+// 构建时（build.py）把这一行替换成 policy.config.json 的字面量；
+// Node 里直接 require 时走文件读取（相对本文件，与调用方目录无关）。
+const POLICY_DEFAULTS = {
+ "_说明": "AI 售后政策配置。这是唯一的规则事实来源（single source of truth）。改这里 = 改产品行为，不需要改代码。每一项都带 说明 / 依据 / 可改范围，业务侧可直接阅读。",
+ "version": "2026-11-05.1",
+ "autoReply": {
+  "_说明": "AI 什么时候可以自己回客户。阈值越高越保守。",
+  "threshold": {
+   "value": 85,
+   "min": 60,
+   "max": 98,
+   "unit": "%",
+   "label": "自动回复置信度阈值",
+   "_依据": "置信度 ≥ 该值且命中知识条目才允许直接回复；低于该值但高于该值减去 askBand 的，先追问客户。"
+  },
+  "askBand": {
+   "value": 25,
+   "min": 10,
+   "max": 40,
+   "unit": "个百分点",
+   "label": "追问区间宽度",
+   "_依据": "阈值减 askBand 到阈值之间走追问，而不是直接转人工。调大 = 更多问题由 AI 追问解决，人工更轻松但客户多一轮沟通。"
+  },
+  "maxAskRounds": {
+   "value": 2,
+   "min": 1,
+   "max": 4,
+   "unit": "轮",
+   "label": "AI 最多追问轮数",
+   "_依据": "追问用完仍无法判断就转品牌方售后。超过 2 轮客户体验明显变差（FWT-61 与 H5 测试都验证过）。"
+  },
+  "noMatchCap": {
+   "value": 45,
+   "min": 0,
+   "max": 100,
+   "unit": "%",
+   "label": "无知识条目时的置信度封顶",
+   "_技术约束": "不建议产品侧调高。它的含义是「我不认识这个问题，就不能因为格式很像而回」。调高等于允许 AI 编答案。",
+   "locked": true
+  }
+ },
+ "hardRules": {
+  "_说明": "以下情况无论置信度多高，一律先给人看。开关可以关，但关掉会让 AI 直接对客承诺——需业务与技术双签。",
+  "safety": {
+   "value": true,
+   "label": "涉及安全件（锁扣、钢缆、急停、承重结构）",
+   "_依据": "安全件失效可能伤人，误判成本远高于多转一次人工。"
+  },
+  "refund": {
+   "value": true,
+   "label": "客户要求退货、退款或赔偿",
+   "_依据": "涉及钱，AI 不承诺。"
+  },
+  "negative": {
+   "value": true,
+   "label": "客户情绪明显负面或提到律师、公开评价",
+   "_依据": "舆情风险，交给人处理。"
+  },
+  "b2b": {
+   "value": false,
+   "label": "客户是 B 端（企业邮箱）",
+   "_依据": "默认关闭：B 端客户也是客户，先按普通客户处理；需要区分销售渠道时再打开。"
+  }
+ },
+ "shipping": {
+  "_说明": "AI 可以主动承诺寄什么件。金额、库存、地址全部来自数据库，模型不能提供。",
+  "autoCommitLimitUsd": {
+   "value": 50,
+   "min": 0,
+   "max": 500,
+   "unit": "美元",
+   "label": "AI 可自行承诺寄件的单价上限",
+   "_依据": "超过这个金额的零件（控制板 120 美元、锁扣总成 62 美元）必须人工确认。这一项改高会直接增加品牌方的费用敞口。",
+   "locked": true
+  },
+  "smallParts": {
+   "value": true,
+   "label": "≤ 上限的小件可由 AI 直接承诺并扣库存",
+   "_依据": "螺栓包、减震垫这类小五金，寄错成本低，自动化收益高。"
+  },
+  "bigParts": {
+   "value": false,
+   "label": "> 上限的大件允许 AI 直接承诺",
+   "_依据": "默认关。打开前请确认品牌方愿意承担 AI 误判的费用。",
+   "locked": true
+  },
+  "videos": {
+   "value": true,
+   "label": "允许发送知识库中的安装视频与说明书页面",
+   "_依据": "无成本动作，打开即可。"
+  },
+  "requireTrackingWithinHours": {
+   "value": 24,
+   "min": 1,
+   "max": 168,
+   "unit": "小时",
+   "label": "发货后必须回填运单号的时限",
+   "_依据": "FWT-61 里运单拖了 4 天，品牌和消费者都在等。超过时限进「需要你的决定」。"
+  }
+ },
+ "routing": {
+  "_说明": "AI 拿不准时按顺序找人。每一级有时限，超时标红并提醒。",
+  "l1": {
+   "name": "张瑞",
+   "email": "zhang.rui@ironpeak.com",
+   "hours": {
+    "value": 4,
+    "min": 1,
+    "max": 72,
+    "unit": "小时",
+    "label": "一级响应时限（品牌方售后）"
+   },
+   "_依据": "对客承诺的「通常 4 小时内回复」就是这一条。改这里会同时改变发给客户的承诺措辞。"
+  },
+  "l2": {
+   "name": "按订单对应的工厂接口人",
+   "email": "",
+   "hours": {
+    "value": 24,
+    "min": 1,
+    "max": 168,
+    "unit": "小时",
+    "label": "二级响应时限（工厂）"
+   },
+   "_依据": "工厂跨时区、跨公司，24 小时是业务侧认可的实务值。"
+  }
+ },
+ "guard": {
+  "_说明": "流程护栏。这些值影响工单怎么合并、怎么拆，不影响对客措辞。",
+  "mergeReopenDays": {
+   "value": 7,
+   "min": 0,
+   "max": 30,
+   "unit": "天",
+   "label": "工单关闭后多久内再来信自动重新打开",
+   "_依据": "7 天内视为同一问题的延续；更久视为新问题，新开工单。"
+  },
+  "repairGuideDays": {
+   "value": 2,
+   "min": 1,
+   "max": 14,
+   "unit": "天",
+   "label": "修复优先的自修跟进窗口",
+   "_依据": "发出自修指引后 2 天没反馈就追问，避免客户被晾着（FWT-61 里消费者反馈等了 4 天）。"
+  },
+  "batchCluster": {
+   "_说明": "同批次聚集判定：同一问题在某一批次达到这个数量、且显著高于其他批次，才建议升级工厂排查。",
+   "minSame": {
+    "value": 3,
+    "min": 2,
+    "max": 20,
+    "unit": "起",
+    "label": "同批次最少起数"
+   },
+   "ratio": {
+    "value": 2,
+    "min": 1.5,
+    "max": 10,
+    "unit": "倍",
+    "label": "相对其他批次的倍数"
+   }
+  },
+  "maxIssuesPerTicket": {
+   "value": 5,
+   "min": 1,
+   "max": 10,
+   "unit": "条",
+   "label": "一封来信最多拆成几条子问题",
+   "_依据": "防止一封邮件被拆成十个工单。"
+  },
+  "maxReplyWords": {
+   "value": 220,
+   "min": 60,
+   "max": 600,
+   "unit": "词",
+   "label": "对客回复长度上限",
+   "_依据": "售后回复超过 220 词客户基本不读。LLM 生成后按此截断或要求重写。"
+  }
+ },
+ "_变更记录": [
+  {
+   "at": "2026-11-05",
+   "by": "原型初始化",
+   "note": "从原 settings 抽出：threshold / rules / promise / routes；新增 askBand、noMatchCap、mergeReopenDays、repairGuideDays、batchCluster、tracking 时限。"
+  }
+ ],
+ "hardRuleWords": {
+  "_说明": "硬规则的判定词表。来信命中任一词即触发对应规则（大小写不敏感）。规则开关在上方 hardRules；这里管'什么话算触发'。",
+  "safety": {
+   "_说明": "安全件信号分两类。伤害描述词是兜底，只求不漏；零件名可以随产品线增删。",
+   "injury": {
+    "value": [
+     "injur",
+     "hurt",
+     "injured",
+     "collapse",
+     "collapsed",
+     "fell",
+     "electrocut",
+     "burn",
+     "burned",
+     "受伤",
+     "砸",
+     "摔",
+     "触电",
+     "断裂",
+     "塌",
+     "儿童独自",
+     "儿童无人",
+     " kinderen",
+     "verletz",
+     "gerissen",
+     "herid",
+     "roto",
+     "bless",
+     "enfant seul",
+     "children alone",
+     "child alone",
+     "unattended child",
+     "unattended children",
+     "kind unbeaufsichtigt",
+     "niño solo",
+     "enfant seul sans surveillance"
+    ],
+    "locked": true,
+    "label": "伤害描述（锁定）",
+    "_依据": "这类词一旦漏判，后果是伤人事故；误判的代价只是多转一次人工。删改需技术与业务双签。"
+   },
+   "parts": {
+    "value": [
+     "safety",
+     "catch",
+     "latch",
+     "cable",
+     "fray",
+     "frayed",
+     "pulley",
+     "snapped",
+     "broke",
+     "broken",
+     "seilzug",
+     "seil",
+     "sicherheit",
+     "raste",
+     "seguro",
+     "bloqueo",
+     "cable de acero",
+     "sécurité",
+     "verrou",
+     "câble",
+     "cassé",
+     "锁扣",
+     "钢缆",
+     "钢丝",
+     "滑轮",
+     "安全锁",
+     "挂钩"
+    ],
+    "locked": false,
+    "label": "安全部件名称（可编辑）",
+    "_依据": "按产品线增删。新增型号带新的承重 / 传动部件时，把零件名加进来。"
+   }
+  },
+  "refund": {
+   "value": [
+    "refund",
+    "return",
+    "money back",
+    "chargeback",
+    "replace the whole",
+    "rückgabe",
+    "erstattung",
+    "geld zurück",
+    "reembolso",
+    "devolver",
+    "remboursement",
+    "retour",
+    "退货",
+    "退款",
+    "赔偿",
+    "换货"
+   ],
+   "locked": false,
+   "label": "退换货 / 赔偿（可编辑）",
+   "_依据": "涉及钱，命中即转人工。"
+  },
+  "negative": {
+   "value": [
+    "lawyer",
+    "attorney",
+    "review",
+    "trustpilot",
+    "facebook",
+    "instagram",
+    "unacceptable",
+    "ridiculous",
+    "terrible",
+    "scam",
+    "anwalt",
+    "bewertung",
+    "unverschämt",
+    "abogado",
+    "reseña",
+    "inaceptable",
+    "avocat",
+    "avis",
+    "inacceptable",
+    "律师",
+    "投诉",
+    "差评",
+    "曝光",
+    "垃圾"
+   ],
+   "locked": false,
+   "label": "负面情绪 / 公开渠道（可编辑）",
+   "_依据": "提及律师或公开评价意味着舆情风险，交给人处理。"
+  },
+  "b2b": {
+   "value": [
+    "gmail",
+    "yahoo",
+    "outlook",
+    "hotmail",
+    "icloud",
+    "web.de",
+    "gmx",
+    "orange.fr",
+    "telia",
+    "live.",
+    "me.com",
+    "qq.com",
+    "163.com"
+   ],
+   "locked": false,
+   "label": "免费邮箱域名（白名单）",
+   "_依据": "客户邮箱不在这个名单里，就视为企业邮箱（B 端）。仅在 hardRules.b2b 打开时生效，默认关闭。"
+  }
+ }
+};
+
+const Policy = (() => {
+
+  /* ---------- 取值：支持 "routing.l1.hours.value" 这种点路径 ---------- */
+  function pathGet(obj, path){ return String(path).split('.').reduce((o,k)=> (o!=null && typeof o==='object') ? o[k] : undefined, obj); }
+  function pathSet(obj, path, val){ const ks=String(path).split('.'); const last=ks.pop(); const tgt=ks.reduce((o,k)=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; return o[k]; }, obj); tgt[last]=val; }
+
+  // 后台读 state.policy；H5 端没有 state，读从 localStorage 拿到的 adminState.policy
+  function overrides(){
+    if(typeof state!=='undefined' && state && state.policy && state.policy.values) return state.policy.values;
+    if(typeof adminState!=='undefined' && adminState && adminState.policy && adminState.policy.values) return adminState.policy.values;
+    return {};
+  }
+  function raw(path){ const ov=pathGet(overrides(), path); return ov!==undefined ? ov : pathGet(POLICY_DEFAULTS, path); }
+  function get(path){ const v=raw(path); return (v && typeof v==='object' && 'value' in v) ? v.value : v; }
+  function def(path){ return pathGet(POLICY_DEFAULTS, path); }
+  function label(path){ const d=def(path); return d && d.label ? d.label : path; }
+
+  /* ---------- 修改：范围校验 + 审计 ---------- */
+  function set(path, val){
+    const d=def(path);
+    if(!d || typeof d!=='object' || !('value' in d)) throw new Error(`政策项 ${path} 不存在`);
+    if(d.locked) throw new Error(`政策项「${label(path)}」已锁定，需技术与业务双签后才能修改`);
+    let v=val;
+    if(Array.isArray(d.value)){ if(!Array.isArray(val)) throw new Error(`${label(path)} 必须是词表`); v=val.slice(); }
+    else if(typeof d.value==='number'){ v=+val; if(!isFinite(v)) throw new Error(`${label(path)} 必须是数字`); if(d.min!=null && v<d.min) throw new Error(`${label(path)} 不能小于 ${d.min}`); if(d.max!=null && v>d.max) throw new Error(`${label(path)} 不能大于 ${d.max}`); }
+    else if(typeof d.value==='boolean') v=!!val;
+    const from=get(path); if(from===v) return {changed:false, from, to:v};
+    if(typeof state!=='undefined' && state){ state.policy=state.policy||{values:{},log:[]};
+      pathSet(state.policy.values, path, v);
+      state.policy.log.push({ at:Date.now(), who:(typeof ROLE!=='undefined'&&typeof role!=='undefined'&&ROLE[role])?ROLE[role].person:'系统', path, label:label(path), from, to:v, version:POLICY_DEFAULTS.version });
+      if(state.policy.log.length>200) state.policy.log=state.policy.log.slice(-200);
+      if(typeof save==='function') save();
+    }
+    return {changed:true, from, to:v};
+  }
+  function reset(path){ if(typeof state!=='undefined' && state && state.policy){ if(path){ const ks=String(path).split('.'); const last=ks.pop(); const tgt=ks.reduce((o,k)=>o&&o[k],state.policy.values); if(tgt) delete tgt[last]; } else state.policy.values={}; if(typeof save==='function') save(); } }
+  function log(){ return (typeof state!=='undefined' && state && state.policy && state.policy.log) || []; }
+  function diff(){ const out=[]; const walk=(d,p)=>{ if(d&&typeof d==='object'&&Array.isArray(d.value)) return; if(d&&typeof d==='object'&&'value' in d){ const cur=get(p); if(cur!==d.value) out.push({path:p,label:label(p),from:d.value,to:cur}); return; } if(d&&typeof d==='object') for(const k of Object.keys(d)) if(!k.startsWith('_')) walk(d[k], p?p+'.'+k:k); }; walk(POLICY_DEFAULTS,''); return out; }
+
+  /* ---------- 硬规则词表（policy.config.json → hardRuleWords）---------- */
+  // 读取某条规则的词表；safety 分 injury（锁定兜底）与 parts（可编辑）两段
+  // 注意：词表取"当前生效值"（get），不是出厂值（def）——否则设置页加的词永远不生效
+  function words(rule){
+    const d=def('hardRuleWords.'+rule); if(!d) return {all:[], locked:[], editable:[]};
+    if(d.value && Array.isArray(d.value)){ const cur=get('hardRuleWords.'+rule); const lock=d.locked?(Array.isArray(cur)?cur:d.value):null;
+      return { all:(Array.isArray(cur)?cur:d.value).slice(), locked: lock?lock.slice():[], editable: lock?[]:(Array.isArray(cur)?cur:d.value).slice() }; }
+    const curInjury=get('hardRuleWords.'+rule+'.injury'), curParts=get('hardRuleWords.'+rule+'.parts');
+    const lock=(Array.isArray(curInjury)?curInjury:(d.injury?d.injury.value||[]:[])).slice();
+    const edit=(Array.isArray(curParts)?curParts:(d.parts?d.parts.value||[]:[])).slice();
+    return { all:lock.concat(edit), locked:lock, editable:edit };
+  }
+  // 命中的词（大小写不敏感、子串匹配；与原来正则的语义一致：宁可多抓）
+  function hitWords(rule, text){
+    const t=String(text||'').toLowerCase(); if(!t) return [];
+    return words(rule).all.filter(w=>w && t.includes(String(w).toLowerCase()));
+  }
+  // 某条规则是否被这封来信触发（b2b 是"邮箱不在白名单"的反向判定）
+  function matchesHardRule(rule, text, email){
+    if(rule==='b2b'){ if(!email) return false; const e=String(email).toLowerCase();
+      return !words('b2b').all.some(d=>e.includes(String(d).toLowerCase())); }
+    return hitWords(rule, text).length>0;
+  }
+  // 词表增删：锁定段禁止任何修改（含追加），只能由技术改 config 后发布
+  function addWord(rule, kind, word){
+    const w=String(word||'').trim(); if(!w) throw new Error('词不能为空');
+    const node = kind ? pathGet(POLICY_DEFAULTS,'hardRuleWords.'+rule+'.'+kind) : pathGet(POLICY_DEFAULTS,'hardRuleWords.'+rule);
+    if(!node || !Array.isArray(node.value)) throw new Error('该规则没有可编辑词表');
+    if(node.locked) throw new Error(`「${node.label||rule}」已锁定，需技术与业务双签后才能修改`);
+    const cur=get('hardRuleWords.'+rule+(kind?'.'+kind:''));
+    if(cur.map(x=>x.toLowerCase()).includes(w.toLowerCase())) throw new Error('这个词已经在表里');
+    set('hardRuleWords.'+rule+(kind?'.'+kind:''), cur.concat([w]));
+    return {from:cur.length,to:cur.length+1};
+  }
+  function removeWord(rule, kind, word){
+    const node = kind ? pathGet(POLICY_DEFAULTS,'hardRuleWords.'+rule+'.'+kind) : pathGet(POLICY_DEFAULTS,'hardRuleWords.'+rule);
+    if(!node || !Array.isArray(node.value)) throw new Error('该规则没有可编辑词表');
+    if(node.locked) throw new Error(`「${node.label||rule}」已锁定，需技术与业务双签后才能修改`);
+    const cur=get('hardRuleWords.'+rule+(kind?'.'+kind:''));
+    const next=cur.filter(x=>x.toLowerCase()!==String(word).toLowerCase());
+    if(next.length===cur.length) return {changed:false};
+    set('hardRuleWords.'+rule+(kind?'.'+kind:''), next); return {changed:true};
+  }
+
+  /* ---------- 视图：给兼容对象（Engine.assess 现在的入参）---------- */
+  // 返回 { threshold, rules:{safety,refund,negative,b2b}, promise:{smallParts,bigParts,videos} }
+  // h5_app 也读这个，用来在没有 state 时取默认值。
+  function view(){
+    return {
+      threshold: get('autoReply.threshold'),
+      rules: {
+        safety:  get('hardRules.safety'),
+        refund:  get('hardRules.refund'),
+        negative:get('hardRules.negative'),
+        b2b:     get('hardRules.b2b')
+      },
+      promise: {
+        smallParts: get('shipping.smallParts'),
+        bigParts:   get('shipping.bigParts'),
+        videos:     get('shipping.videos')
+      },
+      // 新增项（旧代码不读，不影响）
+      askBand: get('autoReply.askBand'),
+      maxAskRounds: get('autoReply.maxAskRounds'),
+      noMatchCap: get('autoReply.noMatchCap'),
+      autoCommitLimitUsd: get('shipping.autoCommitLimitUsd'),
+      trackingHours: get('shipping.requireTrackingWithinHours'),
+      mergeReopenDays: get('guard.mergeReopenDays'),
+      repairGuideDays: get('guard.repairGuideDays'),
+      l1Hours: get('routing.l1.hours'),
+      l2Hours: get('routing.l2.hours'),
+      l1Name: get('routing.l1.name'),
+      l1Email: get('routing.l1.email'),
+      maxIssues: get('guard.maxIssuesPerTicket'),
+      maxReplyWords: get('guard.maxReplyWords')
+    };
+  }
+
+  /* ---------- 核心决策函数（纯函数）---------- */
+
+  // 是否可以自动回复。输入是"提案 + 事实"，输出是决定。
+  // proposal: { kbId, confidence, evidenceOk, stability, reasons:[], ambiguous }
+  // facts:    { hasMatch }（有没有命中知识条目）
+  function canAutoReply(proposal, facts){
+    facts=facts||{}; const reasons=[]; const v=view();
+    const hard=v.rules;
+    for(const r of (proposal.reasons||[])) if(hard[r]) reasons.push('hardRule:'+r);
+    if(!proposal.kbId && !facts.hasMatch) reasons.push('noKbMatch');
+    if(proposal.confidence==null) reasons.push('noConfidence');
+    else {
+      const noMatchCap=proposal.kbId?100:v.noMatchCap;
+      if(proposal.confidence>noMatchCap) reasons.push('noMatchCap');
+      if(proposal.confidence<v.threshold) reasons.push('belowThreshold:'+proposal.confidence+'<'+v.threshold);
+    }
+    if(proposal.ambiguous) reasons.push('ambiguous');
+    if(proposal.evidenceOk===false) reasons.push('evidenceGate');      // LLM 化之后由 §5 的证据门槛填
+    if(proposal.stability!=null && proposal.stability<0.67) reasons.push('unstable');
+    return { ok: reasons.length===0, action: reasons.length===0?'reply':(proposal.confidence!=null&&proposal.confidence>=v.threshold-v.askBand?'ask':'escalate'), reasons };
+  }
+
+  // 是否可以由 AI 主动承诺寄件（不变量：超过上限必须人确认；开关关掉必须人确认）
+  function canShip(issue, facts){
+    facts=facts||{}; const v=view(); const reasons=[];
+    const value = (issue && issue.partValue!=null) ? issue.partValue : facts.partValue;
+    const hasPart = !!(issue && (issue.part || facts.part));
+    if(!hasPart) return {ok:false, reasons:['noPart']};
+    if(issue && issue.shipOnReply===false) return {ok:false, reasons:['shipOnReplyDisabled']};
+    if(value==null) return {ok:false, reasons:['noPrice']};
+    const limit=v.autoCommitLimitUsd;
+    if(value>limit) reasons.push(`overLimit:${value}>${limit}`);
+    const allowed = value<=limit ? v.promise.smallParts : v.promise.bigParts;
+    if(!allowed) reasons.push(value<=limit?'smallPartsOff':'bigPartsOff');
+    if(facts.qty!=null && facts.qty<=0) reasons.push('outOfStock');
+    if(facts.product==='' || (facts.dealer==='')) { /* 信息不全不阻断寄件本身，只影响承诺措辞 */ }
+    return { ok: reasons.length===0, reasons, limit, value };
+  }
+
+  // 是否必须转人工（不看置信度）
+  function mustEscalate(proposal, facts){
+    facts=facts||{}; const v=view(); const reasons=[];
+    for(const r of (proposal.reasons||[])) if(v.rules[r]) reasons.push('hardRule:'+r);
+    if(proposal.humanRequest) reasons.push('customerAskedHuman');
+    if(proposal.guardSafetyHit) reasons.push('safetyGuard');            // 硬词表兜底，见 §8
+    if((proposal.asks||0)>=v.maxAskRounds && proposal.action==='ask') reasons.push('askRoundsExhausted');
+    return { must: reasons.length>0, reasons };
+  }
+
+  // 合成最终决定：状态 + 是否寄件 + 指派 + SLA 时限
+  function decide(proposal, facts){
+    facts=facts||{}; const v=view();
+    const esc=mustEscalate(proposal,facts);
+    if(esc.must) return { action: esc.reasons.includes('askRoundsExhausted')?'ask':'escalate', status:'human', ship:null, reasons:esc.reasons, slaHours:v.l1Hours };
+    const reply=canAutoReply(proposal,facts);
+    if(reply.action!=='reply') return { action:reply.action, status:reply.action==='ask'?'ai':'human', ship:null, reasons:reply.reasons, slaHours:reply.action==='ask'?null:v.l1Hours };
+    const ship=canShip({part:proposal.part, partValue:proposal.partValue, shipOnReply:proposal.shipOnReply}, facts);
+    return { action:'reply', status:proposal.repairFirst?'guiding':'ai', ship:ship.ok?{part:proposal.part}:{pending:true, reasons:ship.reasons}, reasons:[], slaHours:null };
+  }
+
+  /* ---------- 派生量：SLA、批次聚集、运单 ---------- */
+  function slaHours(level){ return level==='l2' ? get('routing.l2.hours') : get('routing.l1.hours'); }
+  function repairGuideMs(){ return get('guard.repairGuideDays')*(typeof DAY!=='undefined'?DAY:86400000); }
+  function mergeReopenMs(){ return get('guard.mergeReopenDays')*(typeof DAY!=='undefined'?DAY:86400000); }
+  function trackingMs(){ return get('shipping.requireTrackingWithinHours')*(typeof HR!=='undefined'?HR:3600000); }
+  function batchRule(){ return { minSame:get('guard.batchCluster.minSame'), ratio:get('guard.batchCluster.ratio') }; }
+  function isBatchHot(same, others){ const r=batchRule(); return same>=r.minSame && same>=r.ratio*Math.max(1,others); }
+  function askBand(){ return get('autoReply.askBand'); }
+  function maxAskRounds(){ return get('autoReply.maxAskRounds'); }
+  function noMatchCap(){ return get('autoReply.noMatchCap'); }
+
+  return { DEFAULT:POLICY_DEFAULTS, version:()=>POLICY_DEFAULTS.version, raw, get, def, label, set, reset, log, diff, view,
+    canAutoReply, canShip, mustEscalate, decide, words, hitWords, matchesHardRule, addWord, removeWord,
+    slaHours, repairGuideMs, mergeReopenMs, trackingMs, batchRule, isBatchHot, askBand, maxAskRounds, noMatchCap };
+})();
+if (typeof module!=='undefined') module.exports=Policy;
+
+/* ============================================================
+   AI售后 共享引擎（后台与 H5 共用，不依赖 DOM）
+   - 产品目录、订单/批次、知识库条目（多语言关键词 + 回复模板 + 步骤）
+   - 语言识别、产品识别、序列号提取、知识库匹配、置信度、路由规则、回复生成
+
+   【LLM 边界】下面这些函数在正式版由 LLM 承担，原型里只是"够演示"的桩，不追求词表完备：
+     detectLang（语言识别）· matchKB（知识检索 → 向量检索 + 重排）· detectConfirm（客户回信意图）
+     · compose（回复生成 → 以条目 steps/part 为依据生成）· 规则词表 SAFETY/REFUND/NEGATIVE（→ 分类器）
+   【保留的硬逻辑】parseSerial、订单/批次归属、assess 的路由与承诺规则、置信度阈值与追问上限、
+     canShip 判定 —— 这些是业务规则，LLM 替代不了，正式版原样保留。
+   ============================================================ */
+const Engine = (() => {
+
+  /* ---------- 产品 ---------- */
+  const PRODUCTS = [
+    { id:'SM-900', series:{zh:'史密斯机',en:'Smith Machine'}, sku:'IP-SM900-BK', snPrefix:'SM9', has3d:true,  maxUserWeight:150, manualLangs:['EN','DE','ES'] },
+    { id:'SM-700', series:{zh:'史密斯机',en:'Smith Machine'}, sku:'IP-SM700-BK', snPrefix:'SM7', has3d:true,  maxUserWeight:130, manualLangs:['EN'] },
+    { id:'TR-650', series:{zh:'跑步机',en:'Treadmill'},       sku:'IP-TR650-GR', snPrefix:'TR6', has3d:false, maxUserWeight:140, manualLangs:['EN','DE','FR'] },
+    { id:'RW-300', series:{zh:'划船机',en:'Rowing Machine'},  sku:'IP-RW300-WD', snPrefix:'RW3', has3d:true,  maxUserWeight:null, manualLangs:['EN'] },
+    { id:'CB-1200',series:{zh:'龙门架',en:'Cable Crossover'}, sku:'IP-CB1200-BK',snPrefix:'CB1', has3d:false, maxUserWeight:null, manualLangs:[] },
+    { id:'F-C20',  series:{zh:'多功能训练架',en:'Functional Trainer'}, sku:'FT-FC20-BK', snPrefix:'FC2', has3d:false, maxUserWeight:120, manualLangs:['EN','DE'] },
+  ];
+  const productName = (id, lang='zh') => { const p=PRODUCTS.find(x=>x.id===id); return p ? `${p.series[lang==='zh'?'zh':'en']} ${p.id}` : id; };
+
+  /* ---------- 订单与批次（序列号中段 = 批次） ---------- */
+  // 同一型号有多个批次 / 多张订单，这样"同批次聚集"才是一个有区分度的信号
+  let ORDERS = [
+    { id:'PO-24118', product:'SM-900', qty:120, brand:'IronPeak Fitness', factory:'宁波力健机械', dealer:'NordicGym AB',  dealerCity:'Stockholm', batches:['24B'], ship:'2026-09-14', warrantyUntil:'2028-09' },
+    { id:'PO-24060', product:'SM-900', qty:90,  brand:'IronPeak Fitness', factory:'宁波力健机械', dealer:'GymPro Ltd',    dealerCity:'Dubai',     batches:['24A'], ship:'2026-07-20', warrantyUntil:'2028-07' },
+    { id:'PO-24097', product:'TR-650', qty:80,  brand:'IronPeak Fitness', factory:'宁波力健机械', dealer:'FitHaus GmbH',  dealerCity:'Hamburg',   batches:['24A'], ship:'2026-08-30', warrantyUntil:'2028-08' },
+    { id:'PO-24122', product:'TR-650', qty:60,  brand:'IronPeak Fitness', factory:'宁波力健机械', dealer:'NordicGym AB',  dealerCity:'Stockholm', batches:['24C'], ship:'2026-09-25', warrantyUntil:'2028-09' },
+    { id:'PO-24076', product:'RW-300', qty:200, brand:'IronPeak Fitness', factory:'东莞健步工业', dealer:'NordicGym AB',  dealerCity:'Stockholm', batches:['24A'], ship:'2026-08-02', warrantyUntil:'2028-08' },
+    { id:'PO-24088', product:'RW-300', qty:80,  brand:'IronPeak Fitness', factory:'东莞健步工业', dealer:'GymPro Ltd',    dealerCity:'Dubai',     batches:['24B'], ship:'2026-08-15', warrantyUntil:'2028-08' },
+    { id:'PO-24052', product:'SM-700', qty:60,  brand:'IronPeak Fitness', factory:'宁波力健机械', dealer:'GymPro Ltd',    dealerCity:'Dubai',     batches:['24A'], ship:'2026-07-11', warrantyUntil:'2028-07' },
+    { id:'PO-24131', product:'CB-1200',qty:40,  brand:'IronPeak Fitness', factory:'青岛迈动器械', dealer:'FitHaus GmbH',  dealerCity:'Hamburg',   batches:['25A'], ship:'2026-10-28', warrantyUntil:'2028-10' },
+    { id:'PO-25087', product:'F-C20', qty:150, brand:'IronPeak Fitness', factory:'山东宝力龙健身器材', dealer:'Fitshop EU', dealerCity:'Osterrönfeld', batches:['25K'], ship:'2025-10-02', warrantyUntil:'2027-10' },
+  ];
+  const setOrders = (list) => { ORDERS = list; api.ORDERS = list; };
+  // 批次表（后台 state.batches 注入，键 = product + code）：parseSerial 按它取供应商；未注入或查不到时退回订单 factory
+  let BATCHES = [];
+  const setBatches = (list) => { BATCHES = list || []; api.BATCHES = BATCHES; };
+  // 批次异常阈值（见 设计_批次_v1 §2.1，相对规则）：同型号 ≥2 个批次时，客诉率最高的批次 ≥ 最低批次 × ratio 且客诉数 ≥ minTickets → 重点关注；
+  // 同型号只有 1 个批次时退回绝对阈值：客诉数 ≥ minTickets 且客诉率 ≥ soloRate
+  const BATCH_ALERT = { minTickets:3, ratio:1.25, soloRate:0.05 };
+  // 二维码携带的批次（?b=）与标签序列号批次是否冲突：只有序列号有效且两边都有批次、且不同才算冲突；序列号优先
+  function checkBatchConsistency(serial, qrBatch){
+    const sb = serial && serial.valid!==false && serial.batch ? String(serial.batch).toUpperCase() : null;
+    const qb = qrBatch ? String(qrBatch).toUpperCase() : null;
+    return (sb && qb && sb!==qb) ? { mismatch:true, serialBatch:sb, qrBatch:qb } : { mismatch:false };
+  }
+
+  // 中文称呼：有名字 →「Mark，你好。」；没有名字 →「你好。」（H5 匿名用户不再出现“你好，你好”）。tail 为称呼后的接续语
+  const hi=(n,tail='你好。')=>(n?`${n}，`:'')+tail;
+
+  /* ---------- 知识库条目 ---------- */
+  // keywords 按语言；safety=true 表示安全件（按设置一律先给人看）；part 为可寄送零件；shipOnReply=false 表示首次回复不涉及寄件（先排查）
+  const KB = [
+    { id:'cable', product:'SM-900', cat:{zh:'钢缆磨损（上滑轮处）',en:'Cable fraying at top pulley'}, part:'ST-SM9-021', partName:{zh:'钢缆',en:'cable'}, partValue:38, safety:true, video:'0:42',
+      kw:{ en:['cable','fray','frayed','pulley','wire','strand'], de:['seil','seilzug','umlenkrolle','ausgefranst','draht'], es:['cable','polea','deshilach','hilo'], fr:['câble','cable','poulie','effiloch'], sv:['vajer','kabel','trissa'], zh:['钢缆','钢丝','滑轮','磨损','起毛','断丝'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. From your description this is wear on the top-pulley cable, which takes the most load. Please stop using the machine until the cable is replaced — a frayed cable can fail under load.\n\nYour unit is under warranty, so the cable (part ST-SM9-021) is free. ${c.shipText} If you'd like to swap it yourself, it takes about 15 minutes with the included hex keys — I'll send the step-by-step video.`,
+              de:(c)=>`Danke, ${c.name}. Nach Ihrer Beschreibung ist der Seilzug an der oberen Umlenkrolle verschlissen. Bitte benutzen Sie das Gerät nicht weiter, bis der Seilzug ersetzt ist.\n\nIhr Gerät ist in der Garantie, der Seilzug (Teil ST-SM9-021) ist kostenlos. ${c.shipText} Den Austausch können Sie in ca. 15 Minuten selbst durchführen – ich sende Ihnen das Schritt-für-Schritt-Video.`,
+              es:(c)=>`Gracias, ${c.name}. Por tu descripción, el cable de la polea superior está desgastado. Por favor, no uses la máquina hasta sustituirlo.\n\nTu equipo está en garantía: el cable (pieza ST-SM9-021) es gratuito. ${c.shipText} El cambio lleva unos 15 minutos con las llaves incluidas; te envío el vídeo paso a paso.`,
+              fr:(c)=>`Merci, ${c.name}. D'après votre description, le câble de la poulie supérieure est usé. Merci de ne plus utiliser l'appareil tant que le câble n'est pas remplacé.\n\nVotre appareil est sous garantie : le câble (pièce ST-SM9-021) est gratuit. ${c.shipText} Le remplacement prend environ 15 minutes avec les clés fournies ; je vous envoie la vidéo.`,
+              zh:(c)=>`${hi(c.name)}从描述看是上滑轮处钢缆磨损，这是受力最大的位置。请先停止使用，等钢缆更换后再用。\n\n你的设备在保修期内，钢缆（零件 ST-SM9-021）免费。${c.shipText}想自己换的话大约 15 分钟，我把分步视频发给你。` },
+      steps:{ zh:['取下所有配重片，把杠铃杆降到安全挡上。','拧下滑轮盖（2 颗 M6 内六角）。','先松开滑架端的钢缆头，再松开滑轮端。','按原路穿入新钢缆，卡扣朝外。'], en:['Remove all weight plates and lower the bar to the safety stops.','Unscrew the pulley cover (2 × M6 hex).','Release the cable end at the carriage, then at the pulley.','Thread the new cable the same way — the clip faces outward.'] },
+      stepTitle:{zh:'更换上滑轮钢缆',en:'Replace the top pulley cable'} },
+    { id:'catch', product:'SM-900', cat:{zh:'安全锁扣失效',en:'Safety catch not locking'}, part:'SC-SM9-004', partName:{zh:'安全锁扣总成',en:'safety catch assembly'}, partValue:62, safety:true, video:'0:55',
+      kw:{ en:['safety catch','catch','lock','latch','hook','slips','rack the bar'], de:['sicherheitsraste','raste','verriegel','haken','rutscht'], es:['seguro','bloqueo','gancho','pestillo'], fr:['verrou','crochet','sécurité','bloque'], sv:['spärr','lås','krok'], zh:['锁扣','安全锁','挂钩','卡不住','锁不住','滑脱'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. From your video the catch isn't springing back fully, which points to a worn torsion spring in the catch assembly. Please don't rack the bar on that side until it's replaced — keep the safety stops set.\n\nThe safety catch assembly (part SC-SM9-004) is covered under warranty. ${c.shipText} Swapping it takes about 10 minutes with the included hex keys; I'll send the video.`,
+              de:(c)=>`Danke, ${c.name}. Im Video federt die Raste nicht vollständig zurück – das spricht für eine verschlissene Torsionsfeder in der Rastenbaugruppe. Bitte die Stange auf dieser Seite nicht mehr ablegen, bis sie ersetzt ist; Sicherheitsstopper gesetzt lassen.\n\nDie Sicherheitsraste (Teil SC-SM9-004) ist von der Garantie abgedeckt. ${c.shipText} Der Austausch dauert ca. 10 Minuten; ich sende Ihnen das Video.`,
+              es:(c)=>`Gracias, ${c.name}. En el vídeo el seguro no vuelve del todo: apunta a un muelle de torsión desgastado en el conjunto del seguro. No apoyes la barra en ese lado hasta sustituirlo y mantén los topes de seguridad.\n\nEl conjunto del seguro (pieza SC-SM9-004) está cubierto por la garantía. ${c.shipText} El cambio lleva unos 10 minutos; te envío el vídeo.`,
+              fr:(c)=>`Merci, ${c.name}. Sur la vidéo, le verrou ne revient pas complètement : cela indique un ressort de torsion usé dans l'ensemble verrou. Ne posez plus la barre de ce côté avant le remplacement et gardez les butées de sécurité.\n\nL'ensemble verrou de sécurité (pièce SC-SM9-004) est couvert par la garantie. ${c.shipText} Le remplacement prend environ 10 minutes ; je vous envoie la vidéo.`,
+              zh:(c)=>`${hi(c.name)}从视频看锁扣回弹不足，是锁扣总成里的扭簧失效。更换前请不要在这一侧挂杆，并保持安全挡在位。\n\n安全锁扣总成（零件 SC-SM9-004）在保修范围内。${c.shipText}自己更换约 10 分钟，我把视频发你。` },
+      steps:{ zh:['停止使用该侧锁扣，保持安全挡在位。','拆下锁扣盖板（2 颗 M6）。','整体更换锁扣总成，按原扭矩拧紧。','挂杆 3 次确认回弹到位。'], en:['Stop using that side; keep the safety stops set.','Remove the catch cover (2 × M6).','Replace the whole catch assembly and re-tighten.','Rack the bar 3 times to confirm it springs back.'] }, stepTitle:{zh:'更换安全锁扣总成',en:'Replace the safety catch assembly'} },
+    { id:'bolts', product:'SM-900', cat:{zh:'安装包缺件（M10 螺栓）',en:'Missing M10 bolts in assembly pack'}, part:'M10x60-PK', partName:{zh:'M10 螺栓包',en:'M10 bolt pack'}, partValue:6, safety:false, video:null,
+      kw:{ en:['missing','bolt','screw','bolts','screws','pack','bag','step 7','hardware'], de:['fehlt','fehlen','schraube','schrauben','beutel'], es:['falta','faltan','tornillo','tornillos','bolsa'], fr:['manque','manquant','vis','boulon','sachet'], sv:['saknas','skruv','bult'], zh:['缺','少','螺栓','螺丝','配件包','没有'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. Step 7 uses 4 × M10×60 bolts (bag C). ${c.shipText} Meanwhile you can continue with steps 8–10, which don't depend on those bolts.`,
+              de:(c)=>`Danke, ${c.name}. Schritt 7 verwendet 4 × M10×60 (Beutel C). ${c.shipText} Die Schritte 8–10 können Sie schon weitermachen.`,
+              es:(c)=>`Gracias, ${c.name}. El paso 7 usa 4 tornillos M10×60 (bolsa C). ${c.shipText} Mientras tanto puedes continuar con los pasos 8–10.`,
+              fr:(c)=>`Merci, ${c.name}. L'étape 7 utilise 4 vis M10×60 (sachet C). ${c.shipText} Vous pouvez continuer les étapes 8 à 10 en attendant.`,
+              zh:(c)=>`${hi(c.name)}第 7 步使用 4 颗 M10×60（C 袋）。${c.shipText}你可以先继续第 8 到 10 步，这几步不需要这些螺栓。` },
+      steps:{ zh:['核对 C 袋：应有 4 颗 M10×60。','先做第 8 到 10 步。','螺栓到货后回到第 7 步，扭矩 35 N·m。'], en:['Check bag C: should contain 4 × M10×60.','Do steps 8–10 first.','When the bolts arrive, return to step 7 and torque to 35 N·m.'] }, stepTitle:{zh:'补发螺栓包',en:'Bolt pack replacement'} },
+    { id:'e07', product:'TR-650', cat:{zh:'E07 电机过热停机',en:'E07 motor overheat stop'}, part:'PCB-TR6-04', partName:{zh:'电机控制板',en:'motor control board'}, partValue:120, safety:false, video:'1:10', shipOnReply:false,   // 首次回复只给排查步骤，零件在排查无效后才涉及
+      kw:{ en:['e07','error','stops','stopped','overheat','motor','shuts'], de:['e07','fehlercode','stoppt','motor','überhitz'], es:['e07','error','se para','motor','calienta'], fr:['e07','erreur','arrête','moteur','chauffe'], sv:['e07','fel','stannar','motor'], zh:['e07','报错','停机','过热','电机','跑了一会'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. E07 means the motor controller detected overheating. Nine times out of ten it's the running belt needing lubrication, which makes the motor work harder. Please: 1) unplug for 30 minutes, 2) apply the included silicone lubricant under the belt, 3) run 10 minutes at 4 km/h. If E07 returns, reply here and we'll replace the control board under warranty.`,
+              de:(c)=>`Danke, ${c.name}. E07 bedeutet, dass die Motorsteuerung Überhitzung erkannt hat. Meist fehlt dem Laufband Schmierung. Bitte: 1) 30 Minuten vom Netz trennen, 2) das mitgelieferte Silikonöl unter das Laufband geben, 3) 10 Minuten bei 4 km/h laufen lassen. Kommt E07 wieder, antworten Sie hier – dann tauschen wir die Steuerplatine auf Garantie.`,
+              es:(c)=>`Gracias, ${c.name}. E07 significa que el controlador detectó sobrecalentamiento; casi siempre la cinta necesita lubricación. Por favor: 1) desenchufa 30 minutos, 2) aplica el lubricante de silicona incluido bajo la cinta, 3) usa 10 minutos a 4 km/h. Si E07 vuelve, responde aquí y cambiamos la placa en garantía.`,
+              fr:(c)=>`Merci, ${c.name}. E07 signifie que le contrôleur moteur a détecté une surchauffe ; le plus souvent la bande manque de lubrification. Merci de : 1) débrancher 30 minutes, 2) appliquer le lubrifiant silicone fourni sous la bande, 3) marcher 10 minutes à 4 km/h. Si E07 revient, répondez ici et nous remplacerons la carte sous garantie.`,
+              zh:(c)=>`${hi(c.name)}E07 表示电机控制器检测到过热，十有八九是跑带缺润滑导致电机负载偏高。请：1）断电 30 分钟；2）在跑带下涂抹随机附带的硅油；3）以 4 km/h 跑 10 分钟。如果 E07 再出现，回复我，我们在保修内更换控制板。` },
+      steps:{ zh:['断电 30 分钟。','掀起跑带边缘，在跑板上涂硅油（两侧各一条）。','通电后 4 km/h 运行 10 分钟。'], en:['Unplug for 30 minutes.','Lift the belt edge and apply silicone lubricant to the deck (one line each side).','Power on and run 10 minutes at 4 km/h.'] }, stepTitle:{zh:'E07 排查',en:'E07 troubleshooting'} },
+    { id:'belt', product:'TR-650', cat:{zh:'跑带偏移 / 润滑',en:'Belt drifting / lubrication'}, part:null, partName:null, partValue:0, safety:false, video:'0:38',
+      kw:{ en:['belt','drift','lubricat','lubricate','slips','off-center','centre'], de:['laufband','schmier','verrutscht','mittig'], es:['cinta','lubric','descentr'], fr:['bande','lubrif','décentr','tapis'], sv:['band','smörj'], zh:['跑带','偏','润滑','打滑','硅油'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. Belt drift is adjusted with the two rear bolts: turn the bolt on the side the belt drifts toward a quarter turn clockwise, run at 4 km/h for a minute, repeat if needed. Lubricate every 3 months or 100 km — I'll send the short video.`,
+              de:(c)=>`Danke, ${c.name}. Das Laufband wird mit den beiden hinteren Schrauben justiert: die Schraube auf der Seite, zu der das Band wandert, eine Vierteldrehung im Uhrzeigersinn, dann eine Minute bei 4 km/h laufen lassen. Alle 3 Monate oder 100 km schmieren – ich sende das Video.`,
+              es:(c)=>`Gracias, ${c.name}. La cinta se centra con los dos tornillos traseros: gira un cuarto de vuelta en sentido horario el del lado hacia el que se desvía, usa un minuto a 4 km/h y repite si hace falta. Lubrica cada 3 meses o 100 km; te envío el vídeo.`,
+              fr:(c)=>`Merci, ${c.name}. La bande se recentre avec les deux vis arrière : un quart de tour dans le sens horaire du côté où elle dérive, puis une minute à 4 km/h. Lubrifiez tous les 3 mois ou 100 km ; je vous envoie la vidéo.`,
+              zh:(c)=>`${hi(c.name)}跑带偏移用后端两颗调节螺栓校正：偏向哪一侧，就把那一侧顺时针拧四分之一圈，4 km/h 跑一分钟，必要时重复。每 3 个月或 100 公里润滑一次，我把短视频发你。` },
+      steps:{ zh:['找到后端两颗调节螺栓。','偏向侧顺时针拧 1/4 圈。','4 km/h 运行 1 分钟观察。'], en:['Locate the two rear adjustment bolts.','Turn the drift-side bolt 1/4 turn clockwise.','Run 1 minute at 4 km/h and check.'] }, stepTitle:{zh:'跑带校正',en:'Belt alignment'} },
+    { id:'motor', product:'RW-300', cat:{zh:'阻力电机异响',en:'Resistance motor noise'}, part:'RB-RW3-010', partName:{zh:'减震垫',en:'damper pad'}, partValue:9, safety:false, video:'0:50',
+      kw:{ en:['noise','noisy','grinding','rattle','humming','resistance','motor','clunk'], de:['geräusch','laut','brummt','rattert','widerstand'], es:['ruido','zumbido','vibra','resistencia'], fr:['bruit','grince','vibre','résistance'], sv:['ljud','oljud','skrammel','motstånd'], zh:['异响','噪音','响','咔','嗡','阻力'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. A humming or rattling from the resistance unit on the RW-300 is almost always the damper pads under the motor bracket — they compress over time. The damper pad set (part RB-RW3-010) is free under warranty. ${c.shipText} Swapping them takes 10 minutes. If the noise is a grinding sound, please send a short video so we can check the flywheel.`,
+              de:(c)=>`Danke, ${c.name}. Ein Brummen oder Rattern aus der Widerstandseinheit des RW-300 kommt fast immer von den Dämpfungspads unter der Motorhalterung. Das Pad-Set (Teil RB-RW3-010) ist auf Garantie kostenlos. ${c.shipText} Der Tausch dauert 10 Minuten. Bei einem schleifenden Geräusch bitte ein kurzes Video senden.`,
+              es:(c)=>`Gracias, ${c.name}. Un zumbido o traqueteo de la unidad de resistencia del RW-300 casi siempre son las almohadillas bajo el soporte del motor. El juego de almohadillas (pieza RB-RW3-010) es gratuito en garantía. ${c.shipText} El cambio lleva 10 minutos. Si es un ruido de roce, envía un vídeo corto.`,
+              fr:(c)=>`Merci, ${c.name}. Un bourdonnement ou un cliquetis de l'unité de résistance du RW-300 vient presque toujours des patins amortisseurs sous le support moteur. Le jeu de patins (pièce RB-RW3-010) est gratuit sous garantie. ${c.shipText} Le remplacement prend 10 minutes. Si c'est un grincement, envoyez une courte vidéo.`,
+              zh:(c)=>`${hi(c.name)}RW-300 阻力单元的嗡鸣或咔哒声，基本都是电机支架下的减震垫老化压扁了。减震垫一套（零件 RB-RW3-010）保修内免费。${c.shipText}更换 10 分钟。如果是金属摩擦声，请拍一段短视频，我们要检查飞轮。` },
+      steps:{ zh:['拆下阻力单元护罩（4 颗螺丝）。','松开电机支架两颗螺栓，取出旧减震垫。','装入新垫，按原扭矩拧紧。'], en:['Remove the resistance unit cover (4 screws).','Loosen the two bracket bolts and take out the old pads.','Fit the new pads and re-tighten.'] }, stepTitle:{zh:'更换减震垫',en:'Replace damper pads'} },
+    { id:'units', product:'RW-300', cat:{zh:'显示单位错误',en:'Wrong display units'}, part:null, partName:null, partValue:0, safety:false, video:null,
+      kw:{ en:['units','km','miles','metres','meters','display','distance','wrong'], de:['einheit','kilometer','meilen','anzeige'], es:['unidades','millas','kilómetros','pantalla'], fr:['unités','miles','kilomètres','affichage'], sv:['enhet','miles','display'], zh:['单位','英里','公里','显示屏','显示'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. Hold the MODE button for 3 seconds until the display blinks, then press + to switch between metres and miles. Press MODE again to save.`,
+              de:(c)=>`Danke, ${c.name}. Halten Sie MODE 3 Sekunden gedrückt, bis die Anzeige blinkt, dann mit + zwischen Metern und Meilen wechseln. MODE erneut drücken zum Speichern.`,
+              es:(c)=>`Gracias, ${c.name}. Mantén MODE 3 segundos hasta que la pantalla parpadee, luego pulsa + para cambiar entre metros y millas. Pulsa MODE de nuevo para guardar.`,
+              fr:(c)=>`Merci, ${c.name}. Maintenez MODE 3 secondes jusqu'au clignotement, puis + pour passer de mètres à miles. MODE à nouveau pour enregistrer.`,
+              zh:(c)=>`${hi(c.name)}长按 MODE 键 3 秒直到显示屏闪烁，再按 + 在米和英里之间切换，再按 MODE 保存。` },
+      steps:{ zh:['长按 MODE 3 秒。','按 + 切换单位。','按 MODE 保存。'], en:['Hold MODE for 3 s.','Press + to switch units.','Press MODE to save.'] }, stepTitle:{zh:'切换显示单位',en:'Switch display units'} },
+    { id:'assembly', product:'*', cat:{zh:'安装求助',en:'Assembly help'}, part:null, partName:null, partValue:0, safety:false, video:'4:12',
+      kw:{ en:['assemble','assembly','install','instructions','manual','how do i','which step','put together'], de:['aufbau','montage','anleitung','zusammenbau','wie'], es:['montaje','montar','instrucciones','manual','cómo'], fr:['montage','assembler','notice','manuel','comment'], sv:['montera','montering','instruktion'], zh:['安装','组装','怎么装','说明书','第几步','哪一步'] },
+      reply:{ en:(c)=>`Happy to help with assembly, ${c.name}. Tell me which step you're on (the number in the manual) and, if you can, send a photo of the parts in front of you — I'll match them to the step and send the animation for that part.`,
+              de:(c)=>`Gern helfe ich beim Aufbau, ${c.name}. Sagen Sie mir, bei welchem Schritt Sie sind, und schicken Sie nach Möglichkeit ein Foto der Teile – ich ordne sie dem Schritt zu und sende die Animation dazu.`,
+              es:(c)=>`Con gusto te ayudo con el montaje, ${c.name}. Dime en qué paso estás y, si puedes, envía una foto de las piezas: las identifico y te mando la animación de ese paso.`,
+              fr:(c)=>`Avec plaisir pour le montage, ${c.name}. Indiquez-moi l'étape où vous êtes et, si possible, envoyez une photo des pièces : je les associe à l'étape et vous envoie l'animation.`,
+              zh:(c)=>`${hi(c.name,"")}安装问题我来帮你。告诉我你在说明书的第几步，最好拍一张手边零件的照片，我会对应到步骤并把那一步的动画发你。` },
+      steps:{ zh:['告诉我步骤编号。','拍一张零件照片。'], en:['Tell me the step number.','Send a photo of the parts.'] }, stepTitle:{zh:'安装指导',en:'Assembly guidance'} },
+    // 修复优先型条目：粘接失效先用加热/清洁剂软化胶层，无效再换件（shipOnReply:false → 首次回复不承诺寄件）
+    // 零件信息来自爆炸图：20 号件（滑轮架粘接处）、74 号件（配重片存放杆）、6 号件（M10×25 螺栓）
+    { id:'glue', product:'F-C20', cat:{zh:'粘接部件脱胶 / 卡滞（20 号件）',en:'Glued part detached / sticking (part 20)'}, part:'FT-FC20-20', partName:{zh:'滑轮架总成（20 号件）',en:'pulley bracket assembly (part 20)'}, partValue:26, safety:false, shipOnReply:false, repairFirst:true, video:null,
+      kw:{ en:['glue','glued','gluing','bond','bonded','adhesive','stuck','sticking','detach','come loose','comes loose','solvent','heat gun','hair dryer'], de:['kleber','geklebt','klebstoff','löst sich','abgelöst','festgeklebt','klebt'], es:['pegamento','pegado','pegada','despeg','se despega','adhesivo','atorado'], fr:['colle','collé','collage','décoll','se décolle','adhésif','bloqué'], sv:['lim','limmat','limmade','lossnar','fastnar'], zh:['胶水','胶','脱胶','粘住','粘死','卡住','粘接','粘合','溶剂'] },
+      reply:{ en:(c)=>`Thanks, ${c.name}. For ${c.product} the bracket is bonded at the factory, and if it has come loose or is sticking, try this first: 1) warm the joint for 2–3 minutes with a hair dryer (not a heat gun or naked flame), 2) clean the residue with Loctite SF 7063 cleaner and a cloth. If it still won't come apart, reply here — we'll replace the bracket.`,
+              de:(c)=>`Danke, ${c.name}. Beim ${c.product} ist der Halter werkseitig verklebt. Wenn er sich gelöst hat oder klemmt, versuchen Sie zuerst: 1) die Klebestelle 2–3 Minuten mit einem Haartrockner erwärmen (kein Heißluftgerät, keine offene Flamme), 2) die Rückstände mit Loctite SF 7063 und einem Tuch reinigen. Löst er sich weiterhin nicht, antworten Sie hier – dann tauschen wir den Halter.`,
+              es:(c)=>`Gracias, ${c.name}. En el ${c.product} el soporte va pegado de fábrica. Si se ha soltado o se atasca, pruebe primero: 1) caliente la unión 2–3 minutos con un secador de pelo (no pistola de calor ni llama), 2) limpie los restos con Loctite SF 7063 y un paño. Si sigue sin separarse, responda aquí y sustituiremos el soporte.`,
+              fr:(c)=>`Merci, ${c.name}. Sur le ${c.product}, le support est collé en usine. S'il s'est décollé ou qu'il grippe, essayez d'abord : 1) chauffez la jonction 2–3 minutes avec un sèche-cheveux (pas de pistolet thermique ni de flamme), 2) nettoyez les résidus avec Loctite SF 7063 et un chiffon. Si cela ne se décolle toujours pas, répondez ici : nous remplacerons le support.`,
+              sv:(c)=>`Tack, ${c.name}. På ${c.product} är fästet fabrikslimmat. Om det lossnat eller kärvar: 1) värm fogen 2–3 minuter med hårtork (inte värmepistol eller öppen låga), 2) rengör resterna med Loctite SF 7063 och en trasa. Lossnar det fortfarande inte, svara här så byter vi fästet.`,
+              zh:(c)=>`${hi(c.name)}${c.product} 的滑轮架是出厂粘接的。如果已经脱胶或卡住，请先这样试：1）用吹风机加热粘接处 2–3 分钟（不要用热风枪或明火）；2）用 Loctite SF 7063 清洁剂配合抹布清理残胶。如果还是拆不开，回复我，我们给你更换滑轮架。` },
+      steps:{ zh:['断电并卸下负载。','吹风机中档距离 10 cm 加热粘接处 2–3 分钟。','用 Loctite SF 7063 清理残胶，擦拭后通风静置。','装回并测试；仍卡滞则申请换件。'], en:['Power off and unload the machine.','Warm the joint 2–3 minutes with a hair dryer from ~10 cm.','Clean residue with Loctite SF 7063 and let it air.','Refit and test; if still stuck, request a replacement.'], de:['Gerät ausschalten und entlasten.','Die Klebestelle 2–3 Minuten mit einem Haartrockner aus ~10 cm erwärmen.','Rückstände mit Loctite SF 7063 reinigen und ablüften lassen.','Wieder montieren und testen; klemmt es weiter, Ersatz anfordern.'] }, stepTitle:{zh:'处理脱胶部件',en:'Free a bonded part'} },
+  ];
+
+  /* ---------- 规则词表 ---------- */
+  const SAFETY_WORDS = /\b(safety|catch|cable|fray\w*|snapped|broke|broken|collapse\w*|fell|injur\w*|hurt|seilzug|seil|gerissen|riss|sicherheit\w*|verletz\w*|seguro|roto|rota|herid\w*|sécurité|câble|cassé|bless\w*)\b|锁扣|钢缆|断裂|受伤|砸|摔/i;
+  const REFUND_WORDS = /refund|return|money back|chargeback|replace the whole|rückgabe|erstattung|geld zurück|reembolso|devolver|remboursement|retour|退货|退款|赔偿|换货/i;
+  const NEGATIVE_WORDS = /lawyer|attorney|review|trustpilot|facebook|instagram|unacceptable|ridiculous|terrible|scam|anwalt|bewertung|unverschämt|abogado|reseña|inaceptable|avocat|avis|inacceptable|律师|投诉|差评|曝光|垃圾/i;
+  const FREE_MAIL = /gmail|yahoo|outlook|hotmail|icloud|web\.de|gmx|orange\.fr|telia|live\.|me\.com|qq\.com|163\.com/i;
+
+  /* ---------- 语言识别 ---------- */
+  const LANG_HINTS = { de:[' der ',' die ',' das ',' und ',' nicht ',' ist ',' ich ',' nach ',' bei ',' mit ',' hallo ',' mein ',' kann ',' was '], es:[' el ',' que ',' no ',' es ',' un ',' una ',' los ',' del ',' hola ',' falta ',' mi ',' cómo ',' puedo ',' tengo '], fr:[' le ',' les ',' est ',' pas ',' une ',' des ',' je ',' ne ',' comment ',' bonjour ',' mon ',' ma ',' vous ',' merci ',' votre '], sv:[' och ',' att ',' det ',' är ',' inte ',' jag ',' på ',' med ',' den ',' hej ',' min ',' fel '], it:[' il ',' che ',' non ',' una ',' per ',' con ',' sono ',' ciao ',' mio '], en:[' the ',' is ',' and ',' not ',' it ',' my ',' on ',' after ',' does ',' i ',' hi ',' can '] };
+  const ACCENTS = { de:/[äöüß]/g, es:/[ñ¿¡]/g, fr:/[çèêàù]/g, sv:/[å]/g };
+  function detectLang(text){
+    if(/[一-鿿]/.test(text)) return 'zh';
+    const t=' '+text.toLowerCase().replace(/[.,!?;:()\n]/g,' ')+' ';
+    const score={}; for(const [l,ws] of Object.entries(LANG_HINTS)) score[l]=ws.reduce((a,w)=>a+(t.split(w).length-1),0);
+    for(const [l,re] of Object.entries(ACCENTS)){ const n=(t.match(re)||[]).length; if(n) score[l]=(score[l]||0)+n*2; }
+    let best='en', bs=0; for(const [l,s] of Object.entries(score)) if(s>bs){ bs=s; best=l; }
+    return best;
+  }
+
+  /* ---------- 产品 / 序列号 ---------- */
+  const PRODUCT_WORDS = { 'SM-900':['smith machine','smith','multipresse','máquina smith','smith machine','史密斯','龙门史密斯'], 'TR-650':['treadmill','laufband','cinta de correr','tapis de course','löpband','跑步机'], 'RW-300':['rowing','rower','rudergerät','remo','rameur','roddmaskin','划船机'], 'SM-700':[], 'CB-1200':['cable crossover','crossover','龙门架'], 'F-C20':['f-c20','fc20','f c20','functional trainer','funktionstrainer','multi gym','多功能训练架'] };
+  function detectProduct(text){
+    const m=text.match(/\b(SM-?900|SM-?700|TR-?650|RW-?300|CB-?1200)\b/i); if(m) return m[1].toUpperCase().replace(/^(\w{2})-?(\d+)$/,'$1-$2');
+    const t=text.toLowerCase(); for(const [id,ws] of Object.entries(PRODUCT_WORDS)) if(ws.some(w=>t.includes(w))) return id; return null;
+  }
+  const SN_RE=/\b([A-Z]{2}\d)-?(\d{2}[A-Z])-?(\d{5})\b/i;
+  function parseSerial(text){
+    // 部分工厂（如 Bodylonger）用纯数字 11 位序列号：识别为原始号，批次/订单无法从中解析，订单由调用方按产品与已知订单补全
+    const raw=(text||'').match(/\b(\d{11})\b/); if(raw && !(text||'').match(SN_RE)) return { sn:raw[1], valid:true, product:null, batch:null, order:null, raw:true, supplier:null };
+    const m=(text||'').toUpperCase().match(SN_RE); if(!m) return null;
+    const prefix=m[1], batch=m[2], num=m[3]; const p=PRODUCTS.find(x=>x.snPrefix===prefix); if(!p) return { sn:`${prefix}-${batch}-${num}`, valid:false };
+    const o=ORDERS.find(x=>x.product===p.id && x.batches.includes(batch));
+    const b=BATCHES.find(x=>x.product===p.id && x.code===batch);
+    return { sn:`${prefix}-${batch}-${num}`, valid:true, product:p.id, batch, order:o?o.id:null, dealer:o?o.dealer:null, city:o?o.dealerCity:null, factory:o?o.factory:null, warrantyUntil:o?o.warrantyUntil:null, supplier:(b&&b.supplier)||(o?o.factory:null) };
+  }
+  const orderFor = (product) => ORDERS.find(o=>o.product===product) || null;   // 仅用于演示性回退（H5 模拟 OCR 选批次），不用于判定工单归属
+  const ordersFor = (product) => ORDERS.filter(o=>o.product===product);
+
+  /* ---------- 客户回信意图：否定优先 ---------- */
+  // 返回 'human'（要求真人）| 'notfixed'（方案无效）| 'solved'（确认解决）| null（普通来信，交给流水线重新评估）
+  const RE_HUMAN=/\b(human|real person|a person|someone|agent|technician|mitarbeiter|mensch|techniker|persona|humano|técnico|quelqu'un|conseiller|technicien|människa|tekniker)\b|人工|真人|客服|技术人员|上门/i;
+  const RE_NOTFIXED=/\b(still|again|same (problem|issue|error|noise)|not (working|fixed|solved|helping)|(doesn'?t|didn'?t|does not|did not|won'?t) (work|help|fit|lock|stop|start)|no (luck|change|difference)|came back|noch immer|immer noch|wieder|funktioniert nicht|hat nicht geholfen|sigue|otra vez|no funciona|no ha funcionado|todavía|toujours|encore|ne fonctionne pas|n'a pas marché|fortfarande|igen|fungerar inte)\b|还是|仍然|依旧|依然|没用|不管用|没解决|不行|又出现|又报/i;
+  // 强确认词（说明问题已解决）与弱确认词（仅致谢）；致谢只有在短消息里才算确认，带问句的一律不算
+  const RE_SOLVED_STRONG=/\b(fixedok|fixed|solved|resolved|sorted|works now|working now|it works|that worked|that did it|all good|funktioniert( jetzt)?|gelöst|behoben|resuelto|solucionado|funciona|résolu|réglé|fonctionne|löst|fungerar)\b|解决了|好了|可以了|搞定|正常了|修好了/i;
+  const RE_THANKS=/\b(thanks?|thank you|cheers|perfect|great|danke|vielen dank|super|gracias|perfecto|merci|parfait|tack)\b|谢谢|感谢|多谢/i;
+  const RE_CONTRAST=/\b(but|however|although|aber|jedoch|pero|aunque|mais|men|fast)\b|但|不过|可是|然而/i;
+  const RE_QUESTION=/[?？]|\b(can you|could you|when|how|what|why|where|wann|wie|warum|können sie|cuándo|cómo|puede|quand|comment|pouvez|när|hur)\b|什么时候|怎么|为什么|吗/i;
+  function detectConfirm(text){
+    let t=' '+(text||'').toLowerCase()+' ';
+    t=t.replace(/\b(funktioniert wieder|geht wieder|läuft wieder|works again|working again|fonctionne à nouveau|marche à nouveau|funciona de nuevo|fungerar igen)\b|又好了|又能用了/g,' fixedok ').replace(/\b(no more|no longer|nicht mehr|ya no|plus de|inte längre)\b|不再|没有再|没再|没问题/g,' ');
+    if(RE_HUMAN.test(t)) return 'human';
+    if(RE_NOTFIXED.test(t)) return 'notfixed';
+    const neg=RE_CONTRAST.test(t)||/\b(not|n't|nicht|kein|pas|inte)\b|没|未/.test(t)||RE_QUESTION.test(t);
+    if(neg) return null;
+    if(RE_SOLVED_STRONG.test(t)) return 'solved';
+    if(RE_THANKS.test(t) && t.trim().split(/\s+/).length<=6 && t.replace(/[^一-鿿]/g,'').length<=8) return 'solved';
+    return null;
+  }
+
+  /* ---------- 知识库匹配 ---------- */
+  function matchKB(text, product){
+    const t=(text||'').toLowerCase(); const scored=[];
+    for(const e of KB){ if(product && e.product!=='*' && e.product!==product) continue; let hits=0; for(const ws of Object.values(e.kw)) for(const w of ws) if(t.includes(w.toLowerCase())) hits++; if(hits) scored.push({ entry:e, hits:hits+(e.product===product?1:0) }); }
+    scored.sort((a,b)=>b.hits-a.hits);
+    return scored.length ? { entry:scored[0].entry, hits:scored[0].hits, runnerUp:scored[1]?scored[1].entry:null, ambiguous: scored[1] && scored[1].hits===scored[0].hits } : null;
+  }
+
+  /* ---------- 置信度 + 规则 + 路由 ---------- */
+  // 政策（阈值 / 规则开关 / 承诺上限 / 追问区间 / 无匹配封顶）统一从 Policy 读，见 policy.config.json。
+  // 传入 settings 仍然兼容（测试和 H5 里没有 state 时用），但优先读 Policy。
+  const P = (path, fallback) => {
+    if(typeof Policy!=='undefined'){ const v=Policy.get(path); if(v!==undefined && v!==null) return v; }
+    return fallback;
+  };
+  // 置信度表达"AI 有多确定自己知道怎么修"：没有知识库匹配时封顶（型号 / 序列号 / 照片只是加分，不能把一个不认识的问题堆成"可直接回复"）
+  function assess({ text, product, serial, photos=0, email='', settings }){
+    const m = matchKB(text, product);
+    let conf = 35;
+    if(m){ conf += Math.min(30, m.hits*10); if(m.ambiguous) conf -= 10; }
+    if(product) conf += 12; if(serial && serial.valid) conf += 10; if(photos>0) conf += 8;
+    const NO_MATCH_CAP = P('autoReply.noMatchCap', 45);
+    if(!m) conf = Math.min(conf, NO_MATCH_CAP);
+    conf = Math.max(10, Math.min(98, conf));
+    const reasons=[];
+    const on = (name, dflt) => { const v=P('hardRules.'+name, dflt); return v!==false; };
+    // 词表在 policy.config.json → hardRuleWords（设置页可编辑；伤害描述词锁定）。没有 Policy 时回落内置正则（仅 Node 单测引擎时出现）
+    const hit = (rule, re) => (typeof Policy!=='undefined' && Policy.matchesHardRule) ? Policy.matchesHardRule(rule, text, email) : re.test(text);
+    const hitWords = (rule) => (typeof Policy!=='undefined' && Policy.hitWords) ? Policy.hitWords(rule, text) : [];
+    if(on('safety',true) && ((m&&m.entry.safety) || hit('safety', SAFETY_WORDS))) reasons.push({k:'safety', zh:'涉及安全件', en:'Safety-related part', words: m&&m.entry.safety?['知识条目标记为安全件']:hitWords('safety')});
+    if(on('refund',true) && hit('refund', REFUND_WORDS)) reasons.push({k:'refund', zh:'退换货 / 赔偿', en:'Refund or return', words:hitWords('refund')});
+    if(on('negative',true) && hit('negative', NEGATIVE_WORDS)) reasons.push({k:'negative', zh:'情绪负面 / 提及律师或公开评价', en:'Negative tone or public review', words:hitWords('negative')});
+    if(P('hardRules.b2b',false)===true && email && hit('b2b', FREE_MAIL)) reasons.push({k:'b2b', zh:'B 端客户邮箱', en:'Business customer', words:[email]});
+    const threshold = P('autoReply.threshold', 85);
+    const askBand = P('autoReply.askBand', 25);
+    let route, action;
+    if(reasons.length){ route='human'; action='hold'; }
+    else if(m && conf>=threshold){ route='ai'; action='reply'; }          // 直接回复必须有知识条目可依
+    else if(conf>=threshold-askBand){ route='ai'; action='ask'; }
+    else { route='human'; action='hold'; }
+    // 是否可承诺寄件：金额上限与开关都来自政策
+    let canShip=false; if(m && m.entry.part && m.entry.shipOnReply!==false){
+      const limit = P('shipping.autoCommitLimitUsd', 50);
+      canShip = m.entry.partValue<=limit ? P('shipping.smallParts',true)!==false : P('shipping.bigParts',false)===true;
+    }
+    return { match:m, confidence:conf, reasons, route, action, canShip, threshold };
+  }
+
+  /* ---------- 回复生成 ---------- */
+  // ctx: {lang, name, dealer, city, hasSerial, hasPhotos} —— 追问 / 安抚文案按已有信息裁剪（已识别序列号就不再要标签照片）
+  const ASK = { en:(n,c)=>`Thanks, ${n}. To make sure I point you to the right fix, could you tell me which part of the machine this concerns${c.hasPhotos?' and what happens exactly':' and, if possible, send a photo or short video of it'}?${c.hasSerial?'':" If you can also photograph the label on the rear upright, I'll pick up the serial number from it."}`,
+                de:(n,c)=>`Danke, ${n}. Damit ich die richtige Lösung finde: Um welchen Teil des Geräts geht es${c.hasPhotos?' und was genau passiert':', und können Sie ein Foto oder kurzes Video schicken'}?${c.hasSerial?'':' Ein Foto des Typenschilds an der hinteren Säule hilft mir, die Seriennummer zu übernehmen.'}`,
+                es:(n,c)=>`Gracias, ${n}. Para indicarte la solución correcta, ¿puedes decirme a qué parte de la máquina se refiere${c.hasPhotos?' y qué ocurre exactamente':' y enviar una foto o un vídeo corto'}?${c.hasSerial?'':' Si fotografías la etiqueta del poste trasero, tomo el número de serie de ahí.'}`,
+                fr:(n,c)=>`Merci, ${n}. Pour vous indiquer la bonne solution, pouvez-vous préciser quelle partie de l'appareil est concernée${c.hasPhotos?' et ce qui se passe exactement':' et envoyer une photo ou une courte vidéo'} ?${c.hasSerial?'':" Une photo de l'étiquette sur le montant arrière me permettra de relever le numéro de série."}`,
+                sv:(n,c)=>`Tack, ${n}. För att hitta rätt lösning: vilken del av maskinen gäller det${c.hasPhotos?' och vad händer exakt':', och kan du skicka ett foto eller en kort video'}?${c.hasSerial?'':' Ett foto av etiketten på bakre stolpen hjälper mig läsa serienumret.'}`,
+                zh:(n,c)=>`${hi(n)}为了给你准确的处理办法，能说一下是设备的哪个部位${c.hasPhotos?'、具体是什么现象吗？':'吗？最好拍一张照片或短视频。'}${c.hasSerial?'':'如果能拍一下后立柱上的标签，我可以直接读出序列号。'}` };
+  const LOGGED = { en:(c)=>c.hasPhotos||c.hasSerial?` Your request is logged${c.hasPhotos&&c.hasSerial?' with your photos and serial number':c.hasPhotos?' with your photos':' with your serial number'}, so you won't need to repeat anything.`:' Your request is logged, so you won\'t need to repeat anything.',
+                   de:(c)=>c.hasPhotos||c.hasSerial?` Ihre Anfrage ist${c.hasPhotos?' mit Fotos':''}${c.hasPhotos&&c.hasSerial?' und':''}${c.hasSerial?' mit Seriennummer':''} erfasst.`:' Ihre Anfrage ist erfasst.',
+                   es:(c)=>c.hasPhotos||c.hasSerial?` Tu solicitud queda registrada${c.hasPhotos?' con fotos':''}${c.hasPhotos&&c.hasSerial?' y':''}${c.hasSerial?' con número de serie':''}.`:' Tu solicitud queda registrada.',
+                   fr:(c)=>c.hasPhotos||c.hasSerial?` Votre demande est enregistrée${c.hasPhotos?' avec photos':''}${c.hasPhotos&&c.hasSerial?' et':''}${c.hasSerial?' avec numéro de série':''}.`:' Votre demande est enregistrée.',
+                   sv:(c)=>c.hasPhotos||c.hasSerial?` Ditt ärende är registrerat${c.hasPhotos?' med foton':''}${c.hasPhotos&&c.hasSerial?' och':''}${c.hasSerial?' med serienummer':''}.`:' Ditt ärende är registrerat.',
+                   zh:(c)=>c.hasPhotos||c.hasSerial?`你的${c.hasPhotos?'照片':''}${c.hasPhotos&&c.hasSerial?'和':''}${c.hasSerial?'序列号':''}${c.hasPhotos&&c.hasSerial?'都':''}已记录，不需要再重复说明。`:'你的问题已记录，不需要再重复说明。' };
+  const HOLD = { en:(n,c)=>`Thanks, ${n}. I've passed this to our support team so a person can confirm the right fix — they usually reply within 4 hours and you'll get an email as soon as they do.${LOGGED.en(c)}`,
+                 de:(n,c)=>`Danke, ${n}. Ich habe den Fall an unser Support-Team übergeben, damit eine Person die Lösung bestätigt – in der Regel innerhalb von 4 Stunden, Sie erhalten dann eine E-Mail.${LOGGED.de(c)}`,
+                 es:(n,c)=>`Gracias, ${n}. He pasado tu caso a nuestro equipo para que una persona confirme la solución; suelen responder en menos de 4 horas y recibirás un correo.${LOGGED.es(c)}`,
+                 fr:(n,c)=>`Merci, ${n}. J'ai transmis votre demande à notre équipe pour qu'une personne confirme la solution ; réponse sous 4 heures en général, par e-mail.${LOGGED.fr(c)}`,
+                 sv:(n,c)=>`Tack, ${n}. Jag har lämnat ärendet till vårt supportteam så att en person kan bekräfta lösningen – svar inom 4 timmar som regel, via e-post.${LOGGED.sv(c)}`,
+                 zh:(n,c)=>`${hi(n)}我已把问题转给售后团队，由专人确认处理方案，通常 4 小时内回复，届时会邮件通知你。${LOGGED.zh(c)}` };
+  // 寄件句：AI 有权承诺 → "将从 X 寄出"；无权（> 50 美元且未开 bigParts）→ "同事会在 N 小时内确认补发"；人工放行后也用 SHIP 句通知客户
+  const SHIP = { en:(c)=>`We'll ship it from ${c.dealer} in ${c.city}, usually 2–4 working days, and email you the tracking number.`,
+                 de:(c)=>`Versand von ${c.dealer} in ${c.city}, in der Regel 2–4 Werktage; die Sendungsnummer erhalten Sie per E-Mail.`,
+                 es:(c)=>`Lo enviamos desde ${c.dealer} en ${c.city}, normalmente en 2–4 días laborables, y te mandamos el número de seguimiento por correo.`,
+                 fr:(c)=>`Expédition depuis ${c.dealer} à ${c.city}, en général sous 2 à 4 jours ouvrés ; vous recevrez le numéro de suivi par e-mail.`,
+                 sv:(c)=>`Vi skickar den från ${c.dealer} i ${c.city}, normalt inom 2–4 arbetsdagar, och mejlar spårningsnumret.`,
+                 zh:(c)=>`将从 ${c.dealer}（${c.city}）寄出，通常 2 到 4 个工作日，物流单号会邮件发你。` };
+  const PENDING = { en:(c)=>`A colleague will confirm the replacement within ${c.hours} hours and you'll get an email with the shipping details.`,
+                    de:(c)=>`Ein Kollege bestätigt den Ersatz innerhalb von ${c.hours} Stunden; Sie erhalten dann eine E-Mail mit den Versanddetails.`,
+                    es:(c)=>`Un compañero confirmará el envío en menos de ${c.hours} horas y recibirás un correo con los detalles.`,
+                    fr:(c)=>`Un collègue confirmera l'envoi sous ${c.hours} heures et vous recevrez un e-mail avec les détails.`,
+                    sv:(c)=>`En kollega bekräftar utbytet inom ${c.hours} timmar och du får ett mejl med leveransuppgifterna.`,
+                    zh:(c)=>`同事会在 ${c.hours} 小时内确认补发，确认后邮件通知你寄送信息。` };
+  function shipLine(lang, canShip, c){ return (canShip?SHIP:PENDING)[lang](c); }
+  // 这次回复是否涉及寄件：有零件且该条目首次回复就承诺零件
+  function offersPart(assessment){ const e=assessment.match&&assessment.match.entry; return e&&e.part&&e.shipOnReply!==false ? e : null; }
+  function compose(assessment, ctx){
+    const lang = ['en','de','es','fr','sv','zh'].includes(ctx.lang)?ctx.lang:'en';
+    const c = { name:ctx.name||(lang==='zh'?'':'there'), dealer:ctx.dealer||'our warehouse', city:ctx.city||'Europe', hasSerial:!!ctx.hasSerial, hasPhotos:!!ctx.hasPhotos, hours:ctx.hours||4 };
+    c.shipText = offersPart(assessment) ? shipLine(lang, assessment.canShip!==false, c) : '';
+    if(assessment.action==='reply' && assessment.match) return assessment.match.entry.reply[lang] ? assessment.match.entry.reply[lang](c) : assessment.match.entry.reply.en(c);
+    if(assessment.action==='ask') return ASK[lang](c.name,c);
+    return HOLD[lang](c.name,c);
+  }
+  // 系统译文（给服务端看的中文摘要）
+  function summarizeZh(assessment, ctx){
+    const m=assessment.match; const parts=[];
+    parts.push(m?`匹配知识库「${m.entry.cat.zh}」（命中 ${m.hits} 个关键词${m.ambiguous?'，与「'+m.runnerUp.cat.zh+'」得分相同':''}）`:'未匹配到知识库条目');
+    parts.push(`置信度 ${assessment.confidence}%（阈值 ${assessment.threshold}%）`);
+    if(assessment.reasons.length) parts.push('触发规则：'+assessment.reasons.map(r=>r.zh).join('、'));
+    parts.push(assessment.route==='ai'?(assessment.action==='reply'?'→ AI 直接回复':'→ AI 追问补充信息'):'→ 暂停自动回复，转品牌方售后');
+    return parts.join('；');
+  }
+
+  const LANG_NAME = { en:'English', de:'Deutsch', es:'Español', fr:'Français', it:'Italiano', sv:'Svenska', zh:'中文' };
+  const api = { PRODUCTS, ORDERS, KB, productName, detectLang, detectProduct, parseSerial, orderFor, ordersFor, setOrders, BATCHES, setBatches, BATCH_ALERT, checkBatchConsistency, matchKB, assess, compose, shipLine, offersPart, summarizeZh, detectConfirm, LANG_NAME, SN_RE };
+  return api;
+})();
+if (typeof module !== 'undefined') module.exports = Engine;
+
+/* ============================================================
+   客户追踪页 · track_app.js
+   客户从售后邮件里的链接进来，看到"自己邮箱名下全部工单"的实时进度。
+   设计：设计_客户追踪页_v1.md（下文 §x 指该文档章节）
+
+   本文件分五块：
+     1) 基础工具：esc / 时间格式化 / token / 语言
+     2) 数据层：读 as_state + as_h5_inbox → 合并 → 按邮箱过滤 → 对客投影（§3）
+     3) 派生层：状态文案、承诺时间（Policy）、里程碑轨道（§4）
+     4) 渲染：列表 / 详情 / 过期 / 空态 / 演示选择器（§5）
+     5) 轮询与状态保持（§7）
+
+   约束提醒：
+     · 所有来自数据的字符串必须过 esc()。
+     · 不渲染 tr / confidence / reasons / kbId / assignee / pending.from 等内部字段。
+     · 不硬编码任何客户名/邮箱，一律按 cust.email 小写全等匹配。
+   ============================================================ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const STORE_KEY='as_state', INBOX_KEY='as_h5_inbox', LANG_KEY='as_track_lang', MAIL_SUPPORT='service@ironpeak.com';
+const H5_URL='原型_H5扫码端.html';
+const MIN=60000, HR=3600000, DAY=86400000;
+const DEMO_CUSTOMER_LIMIT=7;
+
+/* ---------- 品牌色（与 h5_head 同一套 shade/tint 写法） ---------- */
+function shade(hex,p){ const n=parseInt(String(hex).replace('#','').slice(0,6),16); let r=(n>>16)+Math.round(255*p/100),g=((n>>8)&255)+Math.round(255*p/100),b=(n&255)+Math.round(255*p/100); const c=v=>Math.max(0,Math.min(255,v)); return '#'+[c(r),c(g),c(b)].map(v=>v.toString(16).padStart(2,'0')).join(''); }
+function tint(hex){ const n=parseInt(String(hex).replace('#','').slice(0,6),16); const r=n>>16,g=(n>>8)&255,b=n&255; return `rgba(${r},${g},${b},.12)`; }
+
+/* ---------- 状态与 token ---------- */
+const OPEN_STATES=['ai','guiding','human','factory'];
+const isOpen=t=>OPEN_STATES.includes(t.status);
+
+// 确定性哈希（原型代替服务端签名；正式版 HMAC 短链 + 7 天有效 + 可吊销）
+function fnv1a(str){ let h=0x811c9dc5; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0; } return h>>>0; }
+function tokenFor(email){ const h=fnv1a(String(email||'').trim().toLowerCase()+'|ironpeak-track-v1'); return h.toString(36).padStart(8,'0'); }
+
+/* ---------- 语言：chrome 三语，其余回落 en（§4） ---------- */
+const CHROME=['en','de','zh'];
+const L={
+ en:{
+  brand:'IronPeak Support', live:'Live updates', justNow:'Updated just now', newUpdate:'New update: {title}', upToDate:'Updates every few seconds',
+  hello:'Hi {name}', helloAnon:'Hi there',
+  intro:'Here are all your support requests with us. Progress updates automatically.',
+  masked:'Requests for {email}',
+  open:'In progress', resolved:'Resolved', resolvedN:'Resolved requests ({n})', openN:'In progress ({n})',
+  tkt:'Ticket {id}', submitted:'submitted {when}', updated:'updated {when}',
+  tracking:'Tracking {no}',
+  back:'All requests', ticketNo:'Ticket',
+  nowAi:'Our assistant is working on your request', nowGuiding:'Waiting for you to try the fix', nowHuman:'A support engineer is working on it', nowFactory:'Confirming details with the factory', nowDone:'Resolved', nowLate:'In progress — past the promised time, escalated',
+  pAi:'Assistant on it', pGuiding:'Your turn to try', pHuman:'Engineer on it', pFactory:'With the factory', pDone:'Resolved', pLate:'Expediting',
+  labelNow:'Right now',
+  promiseAi:'No action needed from you. If we need anything we will email you.',
+  promiseHuman:'We will get back to you by <b>{at}</b>.', promiseFactory:'We are checking with the factory and will update you by <b>{at}</b>.',
+  promiseGuiding:'Try the steps we sent. We will check in with you by <b>{at}</b>.', promiseDone:'Closed. Nothing further is needed.',
+  promiseLate:'This is taking longer than promised. We have escalated it internally — no action needed from you.',
+  promiseUnknown:'We will update you here as soon as there is news.',
+  issueLabel:'What you told us',
+  progress:'Progress',
+  mSubmitted:'Request received', mFirstReply:'First reply from our team', mHuman:'Support engineer assigned', mFactory:'Escalated to the factory',
+  mGuiding:'Repair guide sent', mParts:'Replacement part requested', mPromiseShip:'Dispatch promised', mShipped:'Dispatched',
+  mTracking:'Tracking number added', mArrived:'Delivered', mResolved:'Resolved', mRated:'You rated this {n}/5', mYourTurn:'Waiting for your reply',
+  /* 里程碑下的一句话概括（只从结构字段拼，见 milestoneDesc） */
+  dReply:'Looks like “{cat}”. We sent the steps to fix it{video}{part}.', dReplyVideo:' with a short video', dReplyPart:' and offered a free {part}',
+  dReplyNoKb:'We sent first guidance on what to check.',
+  dAsk:'Received. Our assistant asked you for a few details so we can point you to the right fix.',
+  dHold:'Received{cat}. This needs a person to confirm, so it went straight to a support engineer.', dHoldCat:' — looks like “{cat}”', dHoldSafety:' (safety-related)',
+  dHuman:'A support engineer has taken over and is working out the fix.',
+  dFactory:'We asked the factory to check. You will hear from us as soon as they confirm.',
+  dGuiding:'“{title}” — {n} steps. Let us know how it goes.', dGuidingNoKb:'Try the steps and let us know how it goes.',
+  dParts:'A free {part} is being arranged for dispatch.',
+  dShipped:'{method}to {to}', dArrived:'Delivered to {to}',
+  dDoneArrived:'The replacement part was delivered and the issue is closed.',
+  dDoneAi:'You confirmed the issue is fixed{after}.', dDoneAfter:' after “{title}”',
+  dDoneBrand:'Our support engineer resolved it.', dDoneFactory:'Resolved after the factory confirmed the cause.', dDoneDealer:'Handled on site by your local dealer.',
+  doneAt:'{when}', dueBy:'by {at}', waiting:'waiting', nextStep:'Next',
+  shipment:'Shipment', parts:'Parts', shippedTo:'To', method:'Method', sPromised:'Promised', sShipped:'Dispatched', sTracking:'Tracking', sArrived:'Delivered',
+  waitingDash:'— waiting', copy:'Copy', copied:'Copied',
+  conversation:'Conversation', older:'Show earlier messages ({n})', you:'You', team:'IronPeak Support',
+  rating:'Your rating', reply:'Reply by email',
+  moreOne:'You have 1 other request', moreN:'You have {n} other requests',
+  expiredT:'This link has expired', expiredP:'Enter the email address you used when you wrote to us and we will send you a fresh link.',
+  emailPh:'you@example.com', sendLink:'Send me a new link', badEmail:'Please enter a valid email address.',
+  expiredNote:'Demo: in the real product we email you a new link. Here we open your requests right away.',
+  emptyT:'No requests for this address yet', emptyP:'Nothing has come in under {email} so far. If you wrote to us from a different address, open the link from that email.',
+  goSubmit:'Report a problem', orReply:'or simply reply to any email from us.', demoPicker:'Demo customer picker',
+  pickerEmptyT:'No demo data in this browser yet', pickerEmptyP:'Open the back-office prototype once in the same browser (it creates the demo data), then come back here.', openBackOffice:'Open the back-office prototype',
+  pickerT:'Demo: choose a customer', pickerP:'Only shown with ?demo=1 or when the page is opened with no parameters. Emails are listed in clear text for the demo — a real link never exposes another customer.',
+  demoBar:'Demo mode · ',
+  allDone:'All clear',
+  shipFrom:'Ships from', arrivedOn:'Delivered {when}',
+  langName:'Language'
+ },
+ de:{
+  brand:'IronPeak Support', live:'Live-Aktualisierung', justNow:'Gerade aktualisiert', newUpdate:'Neue Aktualisierung: {title}', upToDate:'Aktualisiert sich alle paar Sekunden',
+  hello:'Hallo {name}', helloAnon:'Hallo',
+  intro:'Hier sind alle Ihre Serviceanfragen. Der Fortschritt aktualisiert sich automatisch.',
+  masked:'Anfragen für {email}',
+  open:'In Bearbeitung', resolved:'Erledigt', resolvedN:'Erledigte Anfragen ({n})', openN:'In Bearbeitung ({n})',
+  tkt:'Vorgang {id}', submitted:'eingereicht {when}', updated:'aktualisiert {when}',
+  tracking:'Sendung {no}',
+  back:'Alle Anfragen', ticketNo:'Vorgang',
+  nowAi:'Unser Assistent bearbeitet Ihre Anfrage', nowGuiding:'Wir warten auf Ihr Testergebnis', nowHuman:'Ein Servicetechniker bearbeitet Ihre Anfrage', nowFactory:'Wir klären Details mit dem Werk', nowDone:'Erledigt', nowLate:'In Bearbeitung — über der zugesagten Zeit, eskaliert',
+  pAi:'Assistent aktiv', pGuiding:'Bitte testen', pHuman:'Techniker aktiv', pFactory:'Beim Werk', pDone:'Erledigt', pLate:'Eskaliert',
+  labelNow:'Aktuell',
+  promiseAi:'Sie müssen nichts tun. Falls wir etwas brauchen, schreiben wir Ihnen.',
+  promiseHuman:'Wir melden uns bis <b>{at}</b>.', promiseFactory:'Wir klären es mit dem Werk und melden uns bis <b>{at}</b>.',
+  promiseGuiding:'Bitte testen Sie die Schritte. Wir fragen bis <b>{at}</b> nach.', promiseDone:'Abgeschlossen. Es ist nichts weiter zu tun.',
+  promiseLate:'Das dauert länger als zugesagt. Wir haben intern eskaliert — Sie müssen nichts tun.',
+  promiseUnknown:'Wir aktualisieren hier, sobald es Neues gibt.',
+  issueLabel:'Ihre Angabe',
+  progress:'Fortschritt',
+  mSubmitted:'Anfrage eingegangen', mFirstReply:'Erste Antwort von uns', mHuman:'Servicetechniker übernommen', mFactory:'An das Werk eskaliert',
+  mGuiding:'Reparaturanleitung gesendet', mParts:'Ersatzteil angefordert', mPromiseShip:'Versand zugesagt', mShipped:'Versendet',
+  mTracking:'Sendungsnummer erfasst', mArrived:'Zugestellt', mResolved:'Erledigt', mRated:'Ihre Bewertung {n}/5', mYourTurn:'Antwort von Ihnen ausstehend',
+  dReply:'Vermutlich „{cat}“. Wir haben die Schritte zur Behebung geschickt{video}{part}.', dReplyVideo:' – mit kurzem Video', dReplyPart:' und ein kostenloses Ersatzteil ({part}) angeboten',
+  dReplyNoKb:'Wir haben erste Hinweise geschickt, was zu prüfen ist.',
+  dAsk:'Eingegangen. Unser Assistent hat ein paar Details erfragt, um die passende Lösung zu finden.',
+  dHold:'Eingegangen{cat}. Das muss ein Mensch prüfen, daher direkt an einen Servicetechniker.', dHoldCat:' – vermutlich „{cat}“', dHoldSafety:' (sicherheitsrelevant)',
+  dHuman:'Ein Servicetechniker hat übernommen und klärt die Lösung.',
+  dFactory:'Wir haben das Werk um Prüfung gebeten und melden uns, sobald es bestätigt ist.',
+  dGuiding:'„{title}“ – {n} Schritte. Sagen Sie uns, wie es lief.', dGuidingNoKb:'Probieren Sie die Schritte aus und geben Sie uns Bescheid.',
+  dParts:'Ein kostenloses Ersatzteil ({part}) wird zum Versand vorbereitet.',
+  dShipped:'{method}an {to}', dArrived:'Zugestellt an {to}',
+  dDoneArrived:'Das Ersatzteil wurde zugestellt, der Fall ist abgeschlossen.',
+  dDoneAi:'Sie haben bestätigt, dass das Problem{after} behoben ist.', dDoneAfter:' nach „{title}“',
+  dDoneBrand:'Unser Servicetechniker hat es gelöst.', dDoneFactory:'Nach Prüfung durch das Werk gelöst.', dDoneDealer:'Vor Ort durch Ihren Händler erledigt.',
+  doneAt:'{when}', dueBy:'bis {at}', waiting:'ausstehend', nextStep:'Als Nächstes',
+  shipment:'Sendung', parts:'Teile', shippedTo:'An', method:'Art', sPromised:'Zugesagt', sShipped:'Versendet', sTracking:'Sendungsnr.', sArrived:'Zugestellt',
+  waitingDash:'— ausstehend', copy:'Kopieren', copied:'Kopiert',
+  conversation:'Verlauf', older:'Frühere Nachrichten zeigen ({n})', you:'Sie', team:'IronPeak Support',
+  rating:'Ihre Bewertung', reply:'Per E-Mail antworten',
+  moreOne:'Sie haben 1 weitere Anfrage', moreN:'Sie haben {n} weitere Anfragen',
+  expiredT:'Dieser Link ist abgelaufen', expiredP:'Geben Sie die E-Mail-Adresse ein, mit der Sie uns geschrieben haben — wir senden Ihnen einen neuen Link.',
+  emailPh:'name@beispiel.de', sendLink:'Neuen Link senden', badEmail:'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+  expiredNote:'Demo: Im echten Produkt erhalten Sie einen neuen Link per E-Mail. Hier öffnen wir Ihre Anfragen sofort.',
+  emptyT:'Noch keine Anfragen für diese Adresse', emptyP:'Unter {email} ist bisher nichts eingegangen. Wenn Sie uns von einer anderen Adresse geschrieben haben, öffnen Sie den Link aus dieser E-Mail.',
+  goSubmit:'Ein Problem melden', orReply:'oder antworten Sie einfach auf eine unserer E-Mails.', demoPicker:'Demo-Kundenauswahl',
+  pickerEmptyT:'Noch keine Demo-Daten in diesem Browser', pickerEmptyP:'Öffnen Sie das Backoffice-Prototyp einmal im selben Browser (dort entstehen die Demo-Daten), dann hierher zurück.', openBackOffice:'Backoffice-Prototyp öffnen',
+  pickerT:'Demo: Kunde wählen', pickerP:'Nur mit ?demo=1 sichtbar. Adressen stehen im Klartext — ein echter Link zeigt nie andere Kunden.',
+  demoBar:'Demo-Modus · ',
+  allDone:'Alles erledigt',
+  shipFrom:'Versand ab', arrivedOn:'Zugestellt {when}',
+  langName:'Sprache'
+ },
+ zh:{
+  brand:'IronPeak Support', live:'实时更新', justNow:'刚刚更新', newUpdate:'有新进展：{title}', upToDate:'每几秒自动更新',
+  hello:'你好，{name}', helloAnon:'你好',
+  intro:'这里是你名下的全部售后请求，进度会自动更新。',
+  masked:'{email} 名下的请求',
+  open:'进行中', resolved:'已解决', resolvedN:'已解决的请求 ({n})', openN:'进行中 ({n})',
+  tkt:'工单 {id}', submitted:'{when}提交', updated:'{when}更新',
+  tracking:'运单 {no}',
+  back:'全部请求', ticketNo:'工单',
+  nowAi:'助理正在跟进你的请求', nowGuiding:'等你的试机结果', nowHuman:'售后工程师处理中', nowFactory:'正在与工厂确认', nowDone:'已解决', nowLate:'处理中（已超过承诺时间，正在加急）',
+  pAi:'助理处理中', pGuiding:'等你试一下', pHuman:'工程师处理中', pFactory:'工厂确认中', pDone:'已解决', pLate:'加急中',
+  labelNow:'现在',
+  promiseAi:'你这边无需操作。需要你时我们会发邮件。',
+  promiseHuman:'我们会在 <b>{at}</b> 前给你答复。', promiseFactory:'我们在和工厂确认，<b>{at}</b> 前给你更新。',
+  promiseGuiding:'按我们给的步骤试一下，<b>{at}</b> 前我们会来问你结果。', promiseDone:'已结案，无需再做任何操作。',
+  promiseLate:'这件事超过了我们承诺的时间，已在内部加急，你不需要做什么。',
+  promiseUnknown:'有进展我们会在这里更新。',
+  issueLabel:'你反馈的问题',
+  progress:'进度',
+  mSubmitted:'请求已提交', mFirstReply:'我们首次回复', mHuman:'已转售后工程师', mFactory:'已升级工厂确认',
+  mGuiding:'已给出修复步骤', mParts:'备件补发申请中', mPromiseShip:'承诺发出日期', mShipped:'已发出',
+  mTracking:'运单号已回填', mArrived:'已签收', mResolved:'已解决', mRated:'你的评分 {n}/5', mYourTurn:'等你的回复',
+  dReply:'初步判断为「{cat}」，已发送处理步骤{video}{part}。', dReplyVideo:'和演示视频', dReplyPart:'，并可免费补发{part}',
+  dReplyNoKb:'已发送初步的排查建议。',
+  dAsk:'已收到。助理向你确认了几个细节，以便给出准确的处理方法。',
+  dHold:'已收到{cat}。这类问题需要人工确认，已直接转给售后工程师。', dHoldCat:'，初步判断为「{cat}」', dHoldSafety:'（涉及安全部件）',
+  dHuman:'售后工程师已接手，正在核实处理方案。',
+  dFactory:'已请生产工厂核实，有结论我们第一时间告诉你。',
+  dGuiding:'「{title}」共 {n} 步，试完告诉我们结果。', dGuidingNoKb:'按步骤试一下，然后告诉我们结果。',
+  dParts:'{part}将免费补发，正在安排寄出。',
+  dShipped:'{method}寄往 {to}', dArrived:'已送达 {to}',
+  dDoneArrived:'补发的备件已签收，问题处理完成。',
+  dDoneAi:'你确认{after}问题已解决。', dDoneAfter:'按「{title}」处理后',
+  dDoneBrand:'售后工程师已处理完成。', dDoneFactory:'经工厂核实后处理完成。', dDoneDealer:'由当地经销商门店就近处理完成。',
+  doneAt:'{when}', dueBy:'{at} 前', waiting:'等待中', nextStep:'下一步',
+  shipment:'寄件', parts:'件号', shippedTo:'目的地', method:'方式', sPromised:'承诺', sShipped:'已发出', sTracking:'运单', sArrived:'签收',
+  waitingDash:'— 等待中', copy:'复制', copied:'已复制',
+  conversation:'对话', older:'查看更早的对话 ({n})', you:'你', team:'IronPeak Support',
+  rating:'你的评分', reply:'回复这封邮件',
+  moreOne:'你还有 1 个请求', moreN:'你还有 {n} 个请求',
+  expiredT:'链接已失效', expiredP:'输入下单或来信时用的邮箱，我们给你发一个新的链接。',
+  emailPh:'you@example.com', sendLink:'发给我新链接', badEmail:'请输入有效的邮箱地址。',
+  expiredNote:'演示：正式版会发一封带新链接的邮件，这里直接打开你的请求。',
+  emptyT:'这个邮箱名下还没有售后请求', emptyP:'{email} 名下暂时没有记录。如果你用的是另一个邮箱，请从那封邮件里的链接打开。',
+  goSubmit:'去提交一个问题', orReply:'或者直接回复我们的任意一封邮件。', demoPicker:'演示客户选择器',
+  pickerEmptyT:'这个浏览器里还没有演示数据', pickerEmptyP:'先在同一个浏览器里打开一次品牌方后台原型（演示数据由它生成），再回到这里。', openBackOffice:'打开品牌方后台原型',
+  pickerT:'演示：选择客户', pickerP:'仅在 ?demo=1 时显示。邮箱是明文，只用于演示——真实链接绝不会暴露其他客户。',
+  demoBar:'演示模式 · ',
+  allDone:'全部处理完',
+  shipFrom:'发货方', arrivedOn:'{when}签收',
+  langName:'语言'
+ }
+};
+let lang='en';
+function T(k,vars){ const d=L[lang]||L.en; let s=(d[k]!=null?d[k]:(L.en[k]!=null?L.en[k]:k)); if(vars) s=s.replace(/\{(\w+)\}/g,(m,g)=>vars[g]!=null?vars[g]:''); return s; }
+const LANG_LABEL={en:'EN',de:'DE',zh:'中文'};
+
+/* ---------- 时间 ---------- */
+const rtf=new Intl.RelativeTimeFormat('en',{numeric:'auto'});
+function relTime(ms){ if(!ms) return ''; const diff=ms-Date.now(); const a=Math.abs(diff);
+  if(a<MIN) return lang==='zh'?'刚刚':(lang==='de'?'gerade eben':'just now');
+  const [n,u]= a<HR?[Math.round(diff/MIN),'minute'] : a<DAY?[Math.round(diff/HR),'hour'] : [Math.round(diff/DAY),'day'];
+  if(lang==='zh'){ const s=n<0?'前':'后'; return `${Math.abs(n)} ${u==='minute'?'分钟':u==='hour'?'小时':'天'}${s}`; }
+  if(lang==='de'){ const w=u==='minute'?'Min.':u==='hour'?'Std.':'Tg.'; return n<0?`vor ${Math.abs(n)} ${w}`:`in ${n} ${w}`; }
+  return rtf.format(n,u);
+}
+function fmtFull(ms){ if(!ms) return ''; const loc=lang==='zh'?'zh-CN':lang==='de'?'de-DE':'en-GB';
+  return new Intl.DateTimeFormat(loc,{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(ms)); }
+function fmtDay(ms){ if(!ms) return ''; const loc=lang==='zh'?'zh-CN':lang==='de'?'de-DE':'en-GB';
+  return new Intl.DateTimeFormat(loc,{day:'numeric',month:'short',year:'numeric'}).format(new Date(ms)); }
+// 承诺时间在 24h 内时用"今天/明天 18:40"这种客户直接能读懂的说法
+function fmtPromise(ms){ if(!ms) return '';
+  const loc=lang==='zh'?'zh-CN':lang==='de'?'de-DE':'en-GB'; const d=new Date(ms), now=new Date();
+  const t=new Intl.DateTimeFormat(loc,{hour:'2-digit',minute:'2-digit'}).format(d);
+  const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+  const tom=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+  if(sameDay(d,now)) return (lang==='zh'?'今天 ':lang==='de'?'heute ':'today ')+t;
+  if(sameDay(d,tom)) return (lang==='zh'?'明天 ':lang==='de'?'morgen ':'tomorrow ')+t;
+  return fmtFull(ms);
+}
+function maskEmail(e){ const s=String(e||''); const at=s.lastIndexOf('@'); if(at<1) return s;
+  const u=s.slice(0,at), d=s.slice(at); return u[0]+'***'+u.slice(-1)+d; }
+
+/* ============================================================
+   2) 数据层
+   ============================================================ */
+/* Policy 内部先看全局 state、再看 adminState。这里把后台状态同时挂到两处：
+   本文件不声明名为 state 的 let（避免与后台变量语义混淆），只把解析结果赋给全局。 */
+var adminState=null, settings={brandColor:'#0E7A6C'};
+try{ adminState=JSON.parse(localStorage.getItem(STORE_KEY)||'null'); }catch(e){ adminState=null; }
+window.adminState=adminState;
+let rawStore=null; try{ rawStore=localStorage.getItem(STORE_KEY); }catch(e){}
+var state=adminState || undefined;              // 仅供 Policy.overrides() 读取（不参与本页任何逻辑）
+if(adminState&&adminState.settings) settings=Object.assign({},settings,adminState.settings);
+if(typeof Engine!=='undefined'&&adminState&&Array.isArray(adminState.orders)) Engine.setOrders(adminState.orders);
+
+function readInbox(){ try{ const a=JSON.parse(localStorage.getItem(INBOX_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+
+/* H5 记录 → 工单视图（§7.3）。只取对客需要的字段，不把 transcript 以外的内部字段带进来。
+   kbId / route / pendingShip 是结构字段（H5 已写进 inbox），里程碑的一句话概括要用。 */
+function fromH5(rec){
+  const tx=(rec.transcript||[]).map(m=>({t:m.t||rec.createdAt||Date.now(),who:m.who,text:m.text}));
+  const firstAi=tx.find(m=>m.who==='ai');
+  const done=rec.status==='done';
+  return { id:rec.id, product:rec.product||null, sn:rec.sn||null, issue:rec.issue||'', status:rec.status||'ai',
+    createdAt:rec.createdAt||Date.now(), updatedAt:rec.updatedAt||(tx.length?tx[tx.length-1].t:rec.createdAt)||Date.now(),
+    statusSince:rec.createdAt||Date.now(), resolvedAt:done?(rec.updatedAt||Date.now()):null,
+    resolvedBy:done?'ai':null,                       // H5 只有一种关单方式：客户自己确认已解决
+    rating:rec.rating||null, cust:{name:rec.name||'',email:rec.email||'',lang:rec.lang||'en'},
+    kbId:rec.kbId||null, route:rec.route||null, reasons:[],
+    pending:(rec.pendingShip&&!rec.ship)?{type:'ship',part:rec.pendingShip,at:rec.updatedAt||rec.createdAt||null}:null,
+    timeline:tx, shipments:[], guideDue:null, channel:'h5', _fromH5:true, _firstAiAt:firstAi?firstAi.t:null };
+}
+
+/* 合并：后台工单为主；同 id 的 H5 记录取较新状态，并把超出 h5Seen 的尾巴补成 cust/ai 事件（§7.2） */
+function mergeTicket(t,rec){
+  const out=Object.assign({},t,{timeline:(t.timeline||[]).slice()});
+  const upd=rec.updatedAt||rec.createdAt||0;
+  if(upd>(t.updatedAt||0)){ if(rec.status) out.status=rec.status; out.updatedAt=upd; }
+  if(rec.status==='done'&&t.status!=='done'){ out.status='done'; out.resolvedAt=out.resolvedAt||upd; out.resolvedBy=out.resolvedBy||'ai'; }
+  if(rec.rating&&!out.rating) out.rating=rec.rating;
+  const seen=t.h5Seen||0, tx=rec.transcript||[];
+  if(tx.length>seen){ for(const m of tx.slice(seen)) out.timeline.push({t:m.t||upd,who:m.who,text:m.text}); }
+  out.timeline.sort((a,b)=>(a.t||0)-(b.t||0));
+  return out;
+}
+
+/* 按邮箱取该客户全部工单（§7.4）：小写全等，不做模糊匹配、不按姓名匹配 */
+function ticketsFor(email){
+  const e=normEmail(email); if(!e) return [];
+  let list=((adminState&&adminState.tickets)||[]).filter(t=>t&&t.cust&&normEmail(t.cust.email)===e);
+  const inbox=readInbox(); const byId=new Map(list.map(t=>[t.id,t]));
+  for(const rec of inbox){
+    if(!rec||!rec.id||!rec.email) continue;
+    if(normEmail(rec.email)!==e) continue;
+    const cur=byId.get(rec.id);
+    if(cur) byId.set(rec.id, mergeTicket(cur,rec));
+    else byId.set(rec.id, fromH5(rec));
+  }
+  list=[...byId.values()].map(t=>{ const c=Object.assign({},t); c.cust=Object.assign({name:'',email:'',lang:'en'},t.cust||{}); return c; });
+  list.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  return list;
+}
+function normEmail(s){ return String(s==null?'':s).trim().toLowerCase(); }
+
+/* 产品名：走 Engine.PRODUCTS 的系列名（与 H5/后台同一来源），型号单独拼 */
+function productLabel(id){ if(!id) return '—';
+  if(typeof Engine!=='undefined'){
+    const p=Engine.PRODUCTS.find(x=>x.id===id);
+    if(p) return `${p.series[lang==='zh'?'zh':'en']} ${p.id}`;
+  }
+  return String(id);
+}
+function productShort(id){ const p=(typeof Engine!=='undefined')?Engine.PRODUCTS.find(x=>x.id===id):null; return p?p.series.en+' '+p.id:id||'—'; }
+
+/* 客户名：只取名（隐私），没有就用掩码邮箱 */
+function firstName(t){ const n=String((t.cust&&t.cust.name)||'').trim(); if(!n||/^H5\s*用户$/.test(n)) return ''; return n.split(/\s+/)[0]; }
+
+/* ============================================================
+   3) 对客投影（§3）
+   ============================================================ */
+const INTERNAL_AI=[/^\(internal\)/i,/^邮件解析[：:]/];
+/* 内部前缀是结构标记（不是语义猜测）：种子数据里 ai 条目以这两个前缀开头的是解析笔记 */
+function projectEvent(ev){
+  if(!ev||typeof ev.text!=='string'||!ev.text.trim()) return null;
+  const who=ev.who;
+  if(who==='cust') return {kind:'cust',text:ev.text,t:ev.t};
+  if(who==='ai'){ if(INTERNAL_AI.some(re=>re.test(ev.text))) return null; return {kind:'ai',text:ev.text,t:ev.t}; }
+  return null;   // human / fact / dealer / sys 一律不外泄
+}
+function projectTimeline(t){ return (t.timeline||[]).map(projectEvent).filter(Boolean).sort((a,b)=>(a.t||0)-(b.t||0)); }
+function firstVisibleAi(t){ const p=projectTimeline(t); const a=p.find(x=>x.kind==='ai'); return a?a.t:null; }
+/* 摘要：优先用客户自己说过的第一句（客户语言原文），issue 只是后台内部摘要（常为中文），仅作兜底。
+   这样英文客户不会在页面上看到后台的中文标题（FWT-61 种子即如此）。 */
+function summaryOf(t){
+  const first=(projectTimeline(t).find(m=>m.kind==='cust')||{}).text||'';
+  const line=first.split('\n').map(s=>s.trim()).filter(Boolean)[0]||'';
+  if(line) return line.length>140?line.slice(0,139)+'…':line;
+  return (t.issue||'').trim();
+}
+/* cust 消息与 issue 重复时不重复展示（建单即抄送） */
+function convoFor(t){
+  const issue=(t.issue||'').trim(); const list=[];
+  for(const m of projectTimeline(t)){
+    if(m.kind==='cust'&&issue&&String(m.text).trim()===issue) continue;
+    list.push(m);
+  }
+  return list;
+}
+
+/* ============================================================
+   3) 派生：状态文案 / 承诺 / 里程碑
+   ============================================================ */
+function policyNum(path,fallback){ try{ const v=(typeof Policy!=='undefined')?Policy.get(path):undefined; const n=+v; return isFinite(n)?n:fallback; }catch(e){ return fallback; } }
+
+/* 承诺时间：只用结构字段 + 政策层（§4） */
+function deadlineOf(t){
+  if(t.status==='human') return (t.statusSince||t.updatedAt||0)+policyNum('routing.l1.hours',4)*HR;
+  if(t.status==='factory') return (t.statusSince||t.updatedAt||0)+policyNum('routing.l2.hours',24)*HR;
+  if(t.status==='guiding') return t.guideDue||((t.statusSince||t.updatedAt||0)+policyNum('guard.repairGuideDays',2)*DAY);
+  return null;
+}
+function isLate(t){ const d=deadlineOf(t); return !!(d&&t.status!=='done'&&Date.now()>d); }
+function statusKey(t){ if(t.status==='done') return 'done'; if(isLate(t)) return 'late'; return t.status||'ai'; }
+function statusText(t){
+  const late=isLate(t);
+  if(t.status==='done') return T('nowDone');
+  if(late) return T('nowLate');
+  return T({ai:'nowAi',guiding:'nowGuiding',human:'nowHuman',factory:'nowFactory'}[t.status]||'nowAi');
+}
+function pillText(t){ return T({ai:'pAi',guiding:'pGuiding',human:'pHuman',factory:'pFactory',done:'pDone',late:'pLate'}[statusKey(t)]||'pAi'); }
+function promiseHtml(t){
+  const d=deadlineOf(t);
+  if(t.status==='done') return T('promiseDone');
+  if(isLate(t)) return T('promiseLate');
+  if(!d) return T('promiseAi');
+  const at=esc(fmtPromise(d));
+  if(t.status==='human') return T('promiseHuman',{at});
+  if(t.status==='factory') return T('promiseFactory',{at});
+  if(t.status==='guiding') return T('promiseGuiding',{at});
+  return T('promiseUnknown',{at});
+}
+
+/* 里程碑只从结构字段算（§3 表格 + §5.2 的「实际发生与未来承诺」）
+   每条：{key, at(ms|null), state:'done'|'current'|'future', tone?:'warn'|'late', extra?}
+   不读 issue / 邮件正文，也不用关键词匹配。 */
+function milestones(t){
+  const ms=[]; const add=(key,at,extra)=>ms.push({key,at:at||null,extra});
+  if(t.createdAt) add('mSubmitted',t.createdAt);
+  const fa=firstVisibleAi(t); if(fa) add('mFirstReply',fa);
+  if(t.status==='human') add('mHuman',t.statusSince||t.updatedAt);
+  if(t.status==='factory') add('mFactory',t.statusSince||t.updatedAt);
+  if(t.status==='guiding'||t.guideDue) add('mGuiding',t.guideDue||t.statusSince||t.updatedAt);
+  const ships=t.shipments||[];
+  const firstShipped=!!(ships[0]&&(ships[0].shippedAt||ships[0].tracking));
+  if(t.pending&&!firstShipped) add('mParts',t.pending.at||t.statusSince||t.updatedAt);
+  ships.forEach((sp,i)=>{ if(sp.promisedAt) add('mPromiseShip',sp.promisedAt,{i}); });
+  ships.forEach((sp,i)=>{ if(sp.shippedAt) add('mShipped',sp.shippedAt,{i}); });
+  ships.forEach((sp,i)=>{ if(sp.tracking) add('mTracking',sp.trackingAt||sp.shippedAt,{i,tracking:sp.tracking}); });
+  ships.forEach((sp,i)=>{ if(sp.arrivedAt) add('mArrived',sp.arrivedAt,{i}); });
+  const closed=t.status==='done';
+  if(closed) add('mResolved',t.resolvedAt||t.statusSince||t.updatedAt);
+  if(closed&&t.rating) add('mRated',t.resolvedAt||null,{n:t.rating});
+
+  // 排序后标注：已发生 = done；最后一个已发生项 = current（未结案时）；其余 = future
+  ms.sort((a,b)=>(a.at||9e15)-(b.at||9e15));
+  const happened=ms.filter(m=>m.at&&m.at<=Date.now());
+  ms.forEach(m=>{ m.state=(m.at&&m.at<=Date.now())?'done':'future'; });
+  if(!closed&&happened.length){
+    const cur=happened[happened.length-1];
+    if(cur.key!=='mResolved'&&cur.key!=='mRated'){
+      cur.state='current';
+      if(cur.key==='mHuman'||cur.key==='mFactory'||cur.key==='mGuiding') cur.tone='warn';
+      if(isLate(t)) cur.tone='late';
+    }
+  }
+  // 未来占位（status=ai 时的"下一步"）：还没首次回复 → 等我们回复；已回复且在等备件确认 → 等发出；已回复 → 等你的回复。
+  // 之前无论如何都补 mFirstReply，助理已回复时会出现两条「我们首次回复」。
+  if(!closed&&t.status==='ai'){
+    const next=!fa?'mFirstReply':(t.pending&&!firstShipped?'mShipped':'mYourTurn');
+    ms.push({key:next,at:null,state:'future'});
+  }
+  return ms;
+}
+
+/* 同一里程碑的身份：用于实时更新时只强调“这次新出现的项”。 */
+function msIdentity(m){ const x=(m&&m.extra)||{}; return [m&&m.key||'',m&&m.at||'',x.i==null?'':x.i,x.n==null?'':x.n,x.tracking||''].join('|'); }
+function activeTicket(tickets){ if(!tickets||!tickets.length) return null; if(routeId) return tickets.find(t=>t.id===routeId)||null; return tickets.length===1?tickets[0]:null; }
+
+/* ---------- 里程碑下的一句话概括 ----------
+   只从结构字段拼：kbId → 知识条目（类别 / 步骤数 / 视频 / 备件），confidence + reasons + 政策阈值 → 首次回复是
+   「直接给方案 / 追问 / 转人工」，resolvedBy → 怎么解决的，shipments / pending → 寄件。
+   不读邮件正文、不做关键词匹配；正式版这一句由 LLM 基于真实回复生成，这里的结构拼法只是原型替身。
+   文案是页面语言（en/de/zh），知识条目只有 zh/en 两套名字，de 回落 en（与 productLabel 同一做法）。 */
+function kbOf(t){ if(!t||!t.kbId||typeof Engine==='undefined') return null; return Engine.KB.find(k=>k.id===t.kbId)||null; }
+function kbByPart(code){ if(!code||typeof Engine==='undefined') return null; return Engine.KB.find(k=>k.part===code)||null; }
+function kbWord(obj){ if(!obj) return ''; return obj[lang==='zh'?'zh':'en']||obj.en||obj.zh||''; }
+function kbSteps(kb){ if(!kb||!kb.steps) return 0; const s=kb.steps[lang]||kb.steps.en||kb.steps.zh||[]; return s.length; }
+/* 首次回复属于哪一种：与 Engine.assess 的路由规则同一套（触发规则 → 转人工；有条目且过阈值 → 直接回复；阈值下带宽内 → 追问；否则转人工） */
+function replyKind(t){
+  const kb=kbOf(t);
+  if(t._fromH5) return kb?'reply':(t.status==='human'||t.route==='engineer'?'hold':'ask');
+  if((t.reasons||[]).length) return 'hold';
+  const conf=+t.confidence;
+  if(!isFinite(conf)) return kb?'reply':'hold';          // 人工录入等没有置信度的单：有条目就当作给了方案
+  const th=policyNum('autoReply.threshold',85), band=policyNum('autoReply.askBand',25);
+  if(kb&&conf>=th) return 'reply';
+  if(conf>=th-band) return 'ask';
+  return 'hold';
+}
+function milestoneDesc(t,m){
+  if(!m||m.state==='future') return '';
+  const kb=kbOf(t), cat=kbWord(kb&&kb.cat), ships=t.shipments||[], sp=(m.extra&&m.extra.i!=null)?ships[m.extra.i]:null;
+  switch(m.key){
+    case 'mFirstReply':{
+      const kind=replyKind(t);
+      if(kind==='reply'){
+        if(!kb) return T('dReplyNoKb');
+        const offers=kb.part&&kb.shipOnReply!==false, part=kbWord(kb.partName);
+        const gap=(lang==='zh'&&/^[A-Za-z0-9]/.test(part))?' ':'';           // 中文里 CJK 与 "M10 螺栓包" 之间留半角空格
+        return T('dReply',{cat, video:kb.video?T('dReplyVideo'):'', part:offers?T('dReplyPart',{part:gap+part}):''});
+      }
+      if(kind==='ask') return T('dAsk');
+      return T('dHold',{cat:cat?T('dHoldCat',{cat})+(kb.safety?T('dHoldSafety'):''):''});
+    }
+    case 'mHuman': return T('dHuman');
+    case 'mFactory': return T('dFactory');
+    case 'mGuiding':{ const n=kbSteps(kb); return (kb&&n)?T('dGuiding',{title:kbWord(kb.stepTitle)||cat,n}):T('dGuidingNoKb'); }
+    case 'mParts':{ const code=t.pending&&t.pending.part; const pk=kbByPart(code)||kb; const part=(pk&&pk.part===code)?kbWord(pk.partName):(code||''); return part?T('dParts',{part}):''; }
+    case 'mPromiseShip': return sp?[sp.parts,sp.method].filter(Boolean).join(' · '):'';
+    case 'mShipped': return (sp&&sp.to)?T('dShipped',{method:sp.method?sp.method+' · ':'',to:sp.to}):'';
+    case 'mArrived': return (sp&&sp.to)?T('dArrived',{to:sp.to}):'';
+    case 'mResolved':{
+      if(ships.some(s=>s.arrivedAt)) return T('dDoneArrived');
+      const by=t.resolvedBy||'ai';
+      if(by==='brand') return T('dDoneBrand');
+      if(by==='factory') return T('dDoneFactory');
+      if(by==='dealer') return T('dDoneDealer');
+      const title=kb?(kbWord(kb.stepTitle)||cat):'';
+      return T('dDoneAi',{after:title?T('dDoneAfter',{title}):''});
+    }
+    default: return '';
+  }
+}
+
+/* ============================================================
+   4) 渲染
+   ============================================================ */
+let view='loading';       // loading | list | detail | expired | empty | picker
+let routeEmail='';        // 当前客户邮箱（小写）
+let routeId=null;         // 详情页工单 id
+let demoMode=false;
+let gateEmail='';         // 过期页提交后的邮箱
+const ui={ showOlder:false, showDone:false, copied:false, renderedAt:0, lastSig:'', lastTicketSigs:null, lastMs:[], highlightKeys:[], liveTimer:0, dockCleanup:null, langManual:false};
+try{ const s=localStorage.getItem(LANG_KEY); if(s&&CHROME.includes(s)){ lang=s; ui.langManual=true; } }catch(e){}
+
+function setLang(l,persist){ if(!CHROME.includes(l)) l='en'; lang=l; if(persist){ ui.langManual=true; try{ localStorage.setItem(LANG_KEY,l); }catch(e){} } render(true); }
+function syncDocumentLang(){ document.documentElement.lang=lang==='zh'?'zh-CN':lang; }
+
+function applyBrand(){
+  const c=(settings&&settings.brandColor)||'#0E7A6C';
+  const r=document.documentElement.style;
+  r.setProperty('--brand',c); r.setProperty('--brand-ink',shade(c,-18)); r.setProperty('--brand-soft',tint(c));
+}
+
+/* 顶部品牌栏（所有视图共用） */
+function topbar(){
+  const opts=CHROME.map(l=>`<button type="button" id="lang-${l}" data-lang="${l}" aria-pressed="${l===lang}" aria-label="${esc(T('langName'))}: ${esc(LANG_LABEL[l])}">${esc(LANG_LABEL[l])}</button>`).join('');
+  return `<header class="top"><div class="in">
+    <a class="brandmark" href="#/" aria-label="${esc(T('brand'))}"><i></i><b>${esc(T('brand'))}</b></a>
+    <span class="sp"></span>
+    <span class="live" id="live" title="${esc(T('upToDate'))}" aria-label="${esc(T('live'))}"><i></i><span>${esc(T('live'))}</span></span>
+    <div class="langs" role="group" aria-label="${esc(T('langName'))}">${opts}</div>
+  </div></header><div class="update-flag" id="updateFlag" hidden aria-hidden="true"></div>`;
+}
+function demoBar(){
+  if(!demoMode) return '';
+  return `<div class="demo-bar">${esc(T('demoBar'))}<a href="?demo=1#/">${esc(T('demoPicker'))}</a></div>`;
+}
+function stars(n){ let h='<span class="stars" aria-hidden="true">'; for(let i=1;i<=5;i++) h+=`<svg width="13" height="13" viewBox="0 0 20 20" class="${i<=n?'':'off'}" fill="currentColor"><path d="M10 1.6l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 15l-5.2 2.7 1-5.8L1.5 7.8l5.9-.9z"/></svg>`; return h+'</span>'; }
+const chev=()=>'<svg class="chev" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 4.5L13 10l-5.5 5.5"/></svg>';
+const down=()=>'<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7.5l5 5 5-5"/></svg>';
+const tick=()=>'<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>';
+const left=()=>'<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>';
+const clock=()=>'<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.4l2.8 1.8"/></svg>';
+
+/* ---- 列表卡片 ---- */
+function cardHtml(t){
+  const pl=productLabel(t.product);
+  const trk=(t.shipments||[]).map(s=>s.tracking).filter(Boolean)[0]||'';
+  const sk=statusKey(t);
+  return `<li><a class="tcard${t.status==='done'?' done':''}" href="#/t/${encodeURIComponent(t.id)}" data-id="${esc(t.id)}">
+    <div class="l1"><b title="${esc(pl)}">${esc(pl)}</b><span class="pill st-${esc(sk)}" title="${esc(statusText(t))}">${esc(pillText(t))}</span></div>
+    <p class="iss" title="${esc(summaryOf(t))}">${esc(summaryOf(t))}</p>
+    ${trk?`<span class="trk"><span class="mono">${esc(T('tracking',{no:trk}))}</span></span>`:''}
+    <div class="meta">
+      <span>${esc(T('tkt',{id:t.id}))}</span>
+      <span>${esc(T('submitted',{when:relTime(t.createdAt)}))}</span>
+      <span class="upd">${esc(T('updated',{when:relTime(t.updatedAt)}))}</span>
+      ${t.status==='done'&&t.rating?`<span>${stars(t.rating)}<span class="sr">${esc(T('mRated',{n:t.rating}))}</span></span>`:''}
+    </div>
+    ${chev()}
+  </a></li>`;
+}
+
+/* ---- 列表页 ---- */
+function renderList(tickets){
+  const open=tickets.filter(isOpen), done=tickets.filter(t=>t.status==='done');
+  const name=firstName(tickets[0]);
+  const email=routeEmail;
+  const body=`
+  <section class="hello">
+    <h1>${esc(name?T('hello',{name}):T('helloAnon'))}</h1>
+    <p>${esc(T('intro'))}</p>
+    <span class="who"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2.2"/><path d="M3 6l7 5 7-5"/></svg><span class="mono">${esc(maskEmail(email))}</span></span>
+  </section>
+  ${open.length?`<section class="sec">
+    <div class="sec-h"><h2>${esc(T('open'))}</h2><span class="n">${open.length}</span></div>
+    <ul class="cards">${open.map(cardHtml).join('')}</ul>
+  </section>`:`<section class="sec"><div class="sec-h"><h2>${esc(T('open'))}</h2><span class="n">0</span></div><p class="empty-line">${esc(T('allDone'))}</p></section>`}
+  ${done.length?`<section class="sec">
+    <button type="button" class="fold" id="foldDone" aria-expanded="${ui.showDone}" aria-controls="doneList">
+      <span>${esc(T('resolvedN',{n:done.length}))}</span>${down()}
+    </button>
+    <ul class="cards" id="doneList" ${ui.showDone?'':'hidden'}>${done.map(cardHtml).join('')}</ul>
+  </section>`:''}
+  <p class="foot">${esc(T('upToDate'))}</p>`;
+  return body;
+}
+
+/* ---- 进度轨道 ---- */
+function trackHtml(t){
+  const ms=milestones(t);
+  const items=ms.map(m=>{
+    const isNew=ui.highlightKeys.includes(msIdentity(m));
+    const cls=[m.state==='future'?'future':'',m.state==='current'?'current':'',m.tone==='warn'?'warn':'',m.tone==='late'?'late':'',isNew?'is-new':''].filter(Boolean).join(' ');
+    let when='';
+    if(m.key==='mTracking'&&m.extra&&m.extra.tracking) when=`<span class="when mono">${esc(m.extra.tracking)}</span>`;
+    else if(m.key==='mRated'&&m.extra&&m.extra.n) when=`<span class="when">${stars(m.extra.n)}</span>`;
+    else if(m.at) when=`<span class="when">${esc(fmtFull(m.at))}</span>`;
+    else when=`<span class="when">${esc(T('waiting'))}</span>`;
+    const desc=milestoneDesc(t,m);
+    return `<li class="${cls}" role="listitem"><span class="dot" aria-hidden="true"></span><b>${esc(T(m.key,m.extra||{}))}</b>${desc?`<span class="desc">${esc(desc)}</span>`:''}${when}</li>`;
+  }).join('');
+  return `<section class="sec"><div class="sec-h"><h2>${esc(T('progress'))}</h2></div>
+    <div class="panel"><ul class="track" role="list">${items}</ul></div></section>`;
+}
+
+/* ---- 寄件卡 ---- */
+function shipmentHtml(t){
+  const ships=(t.shipments||[]); if(!ships.length) return '';
+  return ships.map((s,si)=>{
+    const rows=[
+      {k:'sPromised',v:s.promisedAt?esc(fmtDay(s.promisedAt)):null,wait:!s.promisedAt},
+      {k:'sShipped',v:s.shippedAt?esc(fmtDay(s.shippedAt)):null,wait:!s.shippedAt},
+      {k:'sTracking',v:s.tracking?`<span class="mono trackno" id="tk${si}">${esc(s.tracking)}</span><button type="button" class="copy" data-copy="${esc(s.tracking)}" aria-label="${esc(T('copy')+' '+s.tracking)}">${ui.copied===s.tracking?tick():'<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="7" width="9.5" height="9.5" rx="2"/><path d="M13 7V5.5A2 2 0 0 0 11 3.5H5.5A2 2 0 0 0 3.5 5.5V11a2 2 0 0 0 2 2H7"/></svg>'}<span>${esc(ui.copied===s.tracking?T('copied'):T('copy'))}</span></button>`:null,wait:!s.tracking},
+      {k:'sArrived',v:s.arrivedAt?esc(fmtDay(s.arrivedAt)):null,wait:!s.arrivedAt}
+    ];
+    return `<section class="sec ship"><div class="sec-h"><h2>${esc(T('shipment'))}</h2></div>
+      <div class="panel">
+        ${s.parts?`<div class="parts"><span class="muted" style="font-size:12.5px">${esc(T('parts'))}</span><br>${esc(s.parts)}</div>`:''}
+        ${(s.to||s.addr||s.method)?`<div class="dest">${[s.to,s.addr,s.method].filter(Boolean).map(esc).join(' · ')}</div>`:''}
+        <div class="srows">${rows.map(r=>`<div class="srow${r.wait?' wait':''}"><span class="ic" aria-hidden="true">${r.wait?'':tick()}</span><span class="lb">${esc(T(r.k))}</span><span class="v">${r.v||esc(T('waitingDash'))}</span></div>`).join('')}</div>
+      </div></section>`;
+  }).join('');
+}
+
+/* ---- 对话 ---- */
+const CONVO_MAX=6;
+function convoHtml(t){
+  const all=convoFor(t);
+  const hidden=Math.max(0,all.length-CONVO_MAX);
+  const shown=(hidden&&!ui.showOlder)?all.slice(-CONVO_MAX):all;
+  const body=shown.map(m=>`<div class="msg ${m.kind}"><div class="bub">${esc(m.text)}</div><div class="by">${esc(m.kind==='cust'?T('you'):T('team'))} · ${esc(fmtFull(m.t))}</div></div>`).join('');
+  return `<section class="sec"><div class="sec-h"><h2>${esc(T('conversation'))}</h2></div>
+    <div class="panel" style="padding-bottom:16px">
+      ${hidden&&!ui.showOlder?`<button type="button" class="older" id="showOlder" style="display:block;margin:12px auto 2px">${esc(T('older',{n:hidden}))} ▾</button>`:''}
+      <div class="convo">${body||`<p class="empty-line">${esc(T('promiseUnknown'))}</p>`}</div>
+    </div></section>`;
+}
+
+/* ---- 详情页 ---- */
+function renderDetail(t,tickets){
+  const sk=statusKey(t), pl=productLabel(t.product);
+  const others=tickets.filter(x=>x.id!==t.id);
+  const mail=`mailto:${MAIL_SUPPORT}?subject=${encodeURIComponent('Re: '+t.id)}`;
+  const showBack=tickets.length>1;
+  const body=`
+  <div class="dhead">
+    ${showBack?`<a class="backlink" href="#/">${left()}<span>${esc(T('back'))}</span></a>`:'<span></span>'}
+    <span class="tid">${esc(T('ticketNo'))} <span class="mono">${esc(t.id)}</span> <span class="who-inline">${esc(maskEmail(routeEmail))}</span></span>
+  </div>
+  <section class="banner st-${esc(sk)} enter" aria-label="${esc(T('labelNow'))}">
+    <div class="k">${esc(T('labelNow'))}</div>
+    <h1>${esc(pl)}</h1>
+    <p class="now"><b>${esc(statusText(t))}</b>${t.sn?` · <span class="mono">SN ${esc(t.sn)}</span>`:''}</p>
+    <p class="promise">${clock()}<span>${promiseHtml(t)}</span></p>
+  </section>
+  ${(()=>{ const s=summaryOf(t); return s?`<div class="issue"><small>${esc(T('issueLabel'))}</small>${esc(s)}</div>`:''; })()}
+  ${trackHtml(t)}
+  ${shipmentHtml(t)}
+  ${convoHtml(t)}
+  ${t.status==='done'&&t.rating?`<section class="sec"><div class="sec-h"><h2>${esc(T('rating'))}</h2></div><div class="panel"><div class="rate">${stars(t.rating)}<span class="muted">${t.rating}/5</span></div></div></section>`:''}
+  <div class="actions">
+    <a class="btn" href="${esc(mail)}"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2.2"/><path d="M3 6l7 5 7-5"/></svg><span>${esc(T('reply'))}</span></a>
+  </div>
+  ${others.length?`<a class="more" href="#/">${esc(others.length===1?T('moreOne'):T('moreN',{n:others.length}))}<span>${esc(others.slice(0,3).map(o=>productShort(o.product)).join(' · '))}</span></a>`:''}
+  <p class="foot">${esc(T('brand'))} · ${esc(T('upToDate'))}</p>
+  <div class="reply-dock" id="replyDock" aria-hidden="true">
+    <a class="btn" href="${esc(mail)}" tabindex="-1" aria-label="${esc(T('reply')+' '+t.id)}"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2.2"/><path d="M3 6l7 5 7-5"/></svg><span>${esc(T('reply'))}</span></a>
+  </div>`;
+  return body;
+}
+
+/* ---- 过期链接页 ---- */
+function renderExpired(){
+  return `<main>
+  <div class="gate">
+    <div class="ico"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5M10 13.6v.01"/></svg></div>
+    <h1>${esc(T('expiredT'))}</h1>
+    <p>${esc(T('expiredP'))}</p>
+    <form id="gateForm" novalidate>
+      <input class="inp" id="gateEmail" type="email" inputmode="email" autocomplete="email" placeholder="${esc(T('emailPh'))}" aria-label="Email" value="${esc(gateEmail)}">
+      <p class="err" id="gateErr" role="alert"></p>
+      <button class="btn" type="submit">${esc(T('sendLink'))}</button>
+    </form>
+    <p class="note">${esc(T('expiredNote'))}</p>
+    <p class="note"><a href="?demo=1#/">${esc(T('demoPicker'))}</a></p>
+  </div>
+  <p class="foot">${esc(T('brand'))}</p>
+  </main>`;
+}
+
+/* ---- 空态 ---- */
+function renderEmpty(){
+  return `<main>
+  <div class="gate ok">
+    <div class="ico"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg></div>
+    <h1>${esc(T('emptyT'))}</h1>
+    <p>${esc(T('emptyP',{email:maskEmail(routeEmail)}))}</p>
+    <div class="actions" style="margin-top:0">
+      <a class="btn" href="${esc(H5_URL)}">${esc(T('goSubmit'))}</a>
+      <a class="btn sec" href="mailto:${MAIL_SUPPORT}?subject=${encodeURIComponent('Support request')}">${esc(T('reply'))}</a>
+    </div>
+    <p class="note">${esc(T('orReply'))}</p>
+    ${demoMode?`<p class="note"><a href="?demo=1#/">${esc(T('demoPicker'))}</a></p>`:''}
+  </div>
+  <p class="foot">${esc(T('brand'))}</p>
+  </main>`;
+}
+
+/* ---- 演示选择器（只 ?demo=1 或裸打开） ---- */
+function renderPicker(){
+  const rows=demoCustomers();
+  if(!rows.length) return `<main>
+  <section class="hello"><h1>${esc(T('pickerT'))}</h1></section>
+  <div class="gate ok">
+    <div class="ico"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5M10 13.6v.01"/></svg></div>
+    <h1>${esc(T('pickerEmptyT'))}</h1>
+    <p>${esc(T('pickerEmptyP'))}</p>
+    <a class="btn" href="../原型_品牌方后台.html">${esc(T('openBackOffice'))}</a>
+    <p class="note">${esc(T('demoBar'))}</p>
+  </div>
+  </main>`;
+  return `<main>
+  <section class="hello"><h1>${esc(T('pickerT'))}</h1><p>${esc(T('pickerP'))}</p></section>
+  <ul class="picker">${rows.map(r=>`<li><a href="?e=${encodeURIComponent(r.email)}&k=${tokenFor(r.email)}&demo=1#/">
+      <span class="em">${esc(r.email)}</span>
+      <span class="ex">${esc(r.product)}</span>
+      <span class="cnt"><span class="${r.open?'on':''}">${r.open} ${esc(T('open'))}</span><span>${r.total-r.open} ${esc(T('resolved'))}</span></span>
+    </a></li>`).join('')}</ul>
+  </main>`;
+}
+function demoCustomers(){
+  const map=new Map();
+  const push=(email,t)=>{ const e=normEmail(email); const k=e; if(!map.has(k)) map.set(k,{email:e,total:0,open:0,sample:t.id,product:'',_u:0}); const r=map.get(k);
+    r.total++; if(isOpen(t)) r.open++; if((t.updatedAt||0)>r._u){ r._u=t.updatedAt||0; r.product=productShort(t.product); r.sample=t.id; } };
+  ((adminState&&adminState.tickets)||[]).forEach(t=>{ if(t&&t.cust&&t.cust.email) push(t.cust.email,t); });
+  readInbox().forEach(rec=>{ if(rec&&rec.email&&!((adminState&&adminState.tickets)||[]).some(t=>t.id===rec.id&&normEmail(t.cust.email)===normEmail(rec.email))) push(rec.email,fromH5(rec)); });
+  return [...map.values()].sort((a,b)=>(b.total-a.total)||(b.open-a.open)||a.email.localeCompare(b.email)).slice(0,DEMO_CUSTOMER_LIMIT);
+}
+
+/* ============================================================
+   hash 路由 + 主渲染
+   ============================================================ */
+function parseHash(){ const h=String(location.hash||'').replace(/^#/,''); const m=h.match(/^\/t\/(.+)$/); return m?{id:decodeURIComponent(m[1])}:{id:null}; }
+
+function timelineSig(t){ return (t.timeline||[]).map(e=>[e.t||0,e.who||'',String(e.text||'')].join('~')).join('|'); }
+function shipmentSig(t){ return (t.shipments||[]).map(s=>[s.promisedAt||'',s.shippedAt||'',s.trackingAt||'',s.tracking||'',s.arrivedAt||'',s.parts||'',s.to||'',s.addr||'',s.method||''].join('~')).join('|'); }
+function ticketSig(t){
+  return [t.id,t.status||'',t.statusSince||'',t.updatedAt||'',t.resolvedAt||'',t.guideDue||'',t.rating||'',t.product||'',t.sn||'',t.issue||'',
+    JSON.stringify(t.pending||null),timelineSig(t),shipmentSig(t)].join(';');
+}
+function dataSig(tickets){ return (tickets||[]).map(ticketSig).join('||'); }
+
+function render(force){
+  applyBrand(); syncDocumentLang();
+  const appEl=$('#app'); if(!appEl) return;
+  const scrollY=window.scrollY||0;
+  let html='', viewName='', activeT=null;
+  ui.lastTicketSigs={};
+  if(!routeEmail){
+    viewName=demoMode?'picker':'expired';
+    html=topbar()+demoBar()+(demoMode?renderPicker():renderExpired());
+    ui.lastSig='';
+  }else{
+    const tickets=ticketsFor(routeEmail);
+    tickets.forEach(t=>{ ui.lastTicketSigs[t.id]=ticketSig(t); });
+    ui.lastSig=dataSig(tickets);
+    if(!tickets.length){ viewName='empty'; html=topbar()+demoBar()+renderEmpty(); }
+    else{
+      const single=tickets.length===1;
+      let t=null;
+      if(routeId) t=tickets.find(x=>x.id===routeId)||null;
+      if(!t&&single) t=tickets[0];
+      if(t){ viewName='detail'; activeT=t; html=topbar()+demoBar()+`<main>${renderDetail(t,tickets)}</main>`; }
+      else { viewName='list'; html=topbar()+demoBar()+`<main>${renderList(tickets)}</main>`; }
+    }
+  }
+  view=viewName;
+  document.body.classList.toggle('has-reply-dock',viewName==='detail');
+  const prevFocus=document.activeElement&&document.activeElement.id;
+  appEl.innerHTML=html;
+  keepScroll(scrollY);
+  wire();
+  if(prevFocus&&document.getElementById(prevFocus)) document.getElementById(prevFocus).focus();
+  ui.lastMs=activeT?milestones(activeT).map(msIdentity):[];
+  ui.renderedAt=Date.now();
+}
+
+/* 详情页滚动过状态横幅后出现轻量回复条；滚到底部时让位给页面内主按钮。 */
+function wireReplyDock(){
+  if(ui.dockCleanup){ ui.dockCleanup(); ui.dockCleanup=null; }
+  const dock=$('#replyDock'); if(!dock) return;
+  const banner=$('.banner'), bottom=$('.actions .btn'), link=dock.querySelector('a');
+  let raf=0, timer=0;
+  const sync=()=>{
+    raf=0; timer=0;
+    const b=banner?banner.getBoundingClientRect():null;
+    const a=bottom?bottom.getBoundingClientRect():null;
+    const vh=window.innerHeight||0;
+    const bottomVisible=!!a&&a.top<vh-12&&a.bottom>0;
+    const show=!!b&&b.bottom<-2&&!bottomVisible;
+    dock.classList.toggle('show',show);
+    dock.setAttribute('aria-hidden',show?'false':'true');
+    if(link) link.tabIndex=show?0:-1;
+    if(!show&&dock.contains(document.activeElement)&&bottom&&bottom.focus) bottom.focus();
+  };
+  const schedule=()=>{
+    if(raf||timer) return;
+    if(window.requestAnimationFrame) raf=window.requestAnimationFrame(sync);
+    else timer=setTimeout(sync,16);
+  };
+  window.addEventListener('scroll',schedule,{passive:true});
+  window.addEventListener('resize',schedule);
+  sync();
+  ui.dockCleanup=()=>{
+    window.removeEventListener('scroll',schedule);
+    window.removeEventListener('resize',schedule);
+    if(raf&&window.cancelAnimationFrame) window.cancelAnimationFrame(raf);
+    if(timer) clearTimeout(timer);
+  };
+}
+
+/* 事件绑定：语言切换、折叠、展开更早、复制、过期页表单 */
+function wire(){
+  wireReplyDock();
+  const appEl=$('#app');
+  appEl.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang,true)));
+  const fold=$('#foldDone');
+  if(fold) fold.addEventListener('click',()=>{ ui.showDone=!ui.showDone; render(true); });
+  const so=$('#showOlder');
+  if(so) so.addEventListener('click',()=>{ ui.showOlder=true; render(true); });
+  appEl.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{
+    const v=b.dataset.copy||'';
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText) await navigator.clipboard.writeText(v); else legacyCopy(v); }catch(e){ legacyCopy(v); }
+    ui.copied=v; const keepY=window.scrollY||0; render(true); keepScroll(keepY);
+    setTimeout(()=>{ if(ui.copied){ ui.copied=false; render(true); } },1800);
+    announce(T('copied'));
+  }));
+  const form=$('#gateForm');
+  if(form) form.addEventListener('submit',ev=>{
+    ev.preventDefault();
+    const v=String(($('#gateEmail')||{}).value||'').trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ const e=$('#gateErr'); if(e) e.textContent=T('badEmail'); return; }
+    gateEmail=v; routeEmail=normEmail(v); routeId=null; demoMode=true;
+    /* 演示：正式版发信，这里直接把 e 写进 URL。
+       注意 file:// 下（双击打开）部分浏览器让 replaceState 抛 SecurityError——
+       地址栏更新失败不能连带中止后面的渲染，否则表现就是"输入邮箱没反应"。 */
+    try{
+      const u=new URL(location.href); u.searchParams.set('e',v); u.searchParams.set('k',tokenFor(v)); u.hash='#/';
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }catch(err){ /* 地址栏保持原样，页面照常进入 */ }
+    render(true);
+  });
+}
+/* 恢复滚动位置：直接写滚动容器的 scrollTop（等价于 scrollTo，且不依赖实现细节） */
+function keepScroll(y){ const t=y||0; ui.scrollTarget=t; try{ if(document.scrollingElement) document.scrollingElement.scrollTop=t; document.documentElement.scrollTop=t; if(document.body) document.body.scrollTop=t; }catch(e){} }
+function legacyCopy(v){ try{ const ta=document.createElement('textarea'); ta.value=v; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){} }
+function announce(msg){ const a=$('#announce'); if(a) a.textContent=msg; }
+
+/* ============================================================
+   启动：token 校验 → 路由 → 渲染 → 轮询
+   ============================================================ */
+function boot(){
+  const qs=new URLSearchParams(location.search);
+  demoMode=qs.get('demo')==='1';
+  const e=String(qs.get('e')||'').trim(), k=String(qs.get('k')||'').trim();
+  if(e){
+    const ok = !!k && k===tokenFor(e);                // demo 选择器生成的也是合法 token，不开后门
+    if(ok){ routeEmail=normEmail(e); if(!ui.langManual){ /* 语言跟随工单，见 syncLangToTicket */ } }
+  } else {
+    /* 直接双击打开文件（没有 e）→ 演示选择器。
+       正式版里裸访问一个无参链接没有意义；原型上团队每次演示都要跳过"链接已失效"页，故默认给选择器。
+       带 e 但 token 不对的仍然进过期页（那才是真"链接失效"的语义）。 */
+    demoMode=true;
+  }
+  const r=parseHash(); routeId=r.id;
+  syncLangToTicket();
+  render(true);
+  window.addEventListener('hashchange',()=>{ const x=parseHash(); if(x.id!==routeId){ routeId=x.id; ui.showOlder=false; render(true); } });
+  setInterval(refresh,4000);
+  window.addEventListener('storage',ev=>{ if(!ev||ev.key===STORE_KEY||ev.key===INBOX_KEY||ev.key===null) refresh(); });
+}
+/* 语言默认跟随工单 cust.lang（首个工单；用户手动切过就不再跟随） */
+function syncLangToTicket(){
+  if(ui.langManual) return;
+  if(!routeEmail) return;
+  const t=(adminState&&adminState.tickets||[]).find(x=>x&&x.cust&&normEmail(x.cust.email)===routeEmail);
+  let cl=t&&t.cust&&t.cust.lang;
+  if(!cl){ const rec=readInbox().find(r=>normEmail(r.email)===routeEmail); cl=rec&&rec.lang; }
+  lang=CHROME.includes(cl)?cl:'en';
+}
+
+/* 重新读 localStorage；只在数据签名变化时重渲染，并保住滚动位置与展开状态 */
+function refresh(){
+  let raw=null; try{ raw=localStorage.getItem(STORE_KEY); }catch(e){}
+  if(raw===rawStore&&routeEmail&&dataSig(ticketsFor(routeEmail))===ui.lastSig){ return; }   // 没有变化就不重渲染
+  const prevSigs=Object.assign({},ui.lastTicketSigs||{});
+  const prevMs=(ui.lastMs||[]).slice();
+  let next=null; try{ next=JSON.parse(raw||'null'); }catch(e){}
+  const changedStore=raw!==rawStore; rawStore=raw;
+  adminState=next; window.adminState=next; state=next||undefined;
+  if(next&&next.settings) settings=Object.assign({},settings,next.settings);
+  if(typeof Engine!=='undefined'&&next&&Array.isArray(next.orders)) Engine.setOrders(next.orders);
+  syncLangToTicket();
+  const tickets=routeEmail?ticketsFor(routeEmail):[];
+  const sig=dataSig(tickets);
+  const changed=tickets.find(t=>prevSigs[t.id]!==ticketSig(t))||null;
+  const active=activeTicket(tickets);
+  const fresh=(changed&&active&&changed.id===active.id)?milestones(active).filter(m=>m.at&&!prevMs.includes(msIdentity(m))):[];
+  if(!routeEmail||sig!==ui.lastSig||changedStore){
+    ui.highlightKeys=fresh.map(msIdentity);
+    const y=window.scrollY||0;
+    render(true);
+    keepScroll(y);
+    if(changed) showLiveNotice(fresh,changed);
+  }
+}
+function showLiveNotice(fresh,t){
+  if(ui.liveTimer) clearTimeout(ui.liveTimer);
+  const titles=(fresh||[]).slice(0,2).map(m=>T(m.key,m.extra||{}));
+  const title=titles.length?titles.join(' · '):statusText(t);
+  const live=$('#live'); if(live){ const label=live.querySelector('span'); if(label) label.textContent=T('justNow'); live.title=T('justNow'); }
+  const flag=$('#updateFlag'); if(flag){ flag.textContent=T('justNow')+' · '+title; flag.hidden=false; }
+  pulse();
+  announce(T('newUpdate',{title}));
+  ui.liveTimer=setTimeout(()=>{
+    ui.highlightKeys=[];
+    document.querySelectorAll('.track li.is-new').forEach(li=>li.classList.remove('is-new'));
+    const el=$('#live'); if(el){ const label=el.querySelector('span'); if(label) label.textContent=T('live'); el.title=T('upToDate'); }
+    const f=$('#updateFlag'); if(f) f.hidden=true;
+    ui.liveTimer=0;
+  },5200);
+}
+function pulse(){ const el=$('#live'); if(!el) return; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),1000); }
+
+window.__refresh=refresh;
+window.__track={ get view(){return view;}, get email(){return routeEmail;}, get scrollTarget(){return ui.scrollTarget==null?null:ui.scrollTarget;},
+  get showOlder(){return ui.showOlder;}, tickets:()=>routeEmail?ticketsFor(routeEmail):[], tokenFor, setLang, projectEvent, milestones, milestoneDesc, replyKind, deadlineOf };
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+// 批次功能回归：node src/batchtest.js（jsdom，末尾必停）
+const {JSDOM,VirtualConsole}=require('jsdom'); const fs=require('fs'); const path=require('path');
+const html=fs.readFileSync(path.join(__dirname,'..','原型_品牌方后台.html'),'utf8');
+const errors=[]; const vc=new VirtualConsole(); vc.on('jsdomError',e=>errors.push(e.message)); vc.on('error',(...a)=>errors.push(a.join(' ')));
+const dom=new JSDOM(html,{runScripts:'dangerously',url:'http://localhost/admin.html',pretendToBeVisual:true,virtualConsole:vc});
+const w=dom.window,d=w.document,E=c=>w.eval(c); w.HTMLCanvasElement.prototype.getContext=()=>null;
+w.confirm=()=>true;
+let pass=0,fail=0; const step=(n,f)=>{try{f();console.log('ok  ',n);pass++;}catch(e){console.log('FAIL',n,'→',e.message);fail++;}};
+const row=id=>d.querySelector(`#main tr.trow[data-prod="${id}"]`);
+const sub=id=>d.querySelector(`#main tr.batch-sub[data-for="${id}"]`);
+
+step('① 9 批次、键唯一',()=>{ if(E('state.batches.length')!==9) throw new Error('len='+E('state.batches.length'));
+  const k=E('state.batches.map(b=>b.product+":"+b.code)'); if(new Set(k).size!==9) throw new Error('dup key'); });
+step('② 表头有批次列，SM-900 显示 2 批次',()=>{ w.go('products'); const th=[...d.querySelectorAll('#main table.tb tr:first-child th')].map(x=>x.textContent);
+  if(!th.includes('批次')) throw new Error('no col'); if(!/2 批次/.test(row('SM-900').textContent)) throw new Error(row('SM-900').textContent.slice(0,80)); });
+step('③ 展开 SM-900 子表 2 行，客诉数与手算一致',()=>{ row('SM-900').querySelector('.batch-toggle').click(); const r=sub('SM-900'); if(!r) throw new Error('no subrow');
+  const t=E("BATCH.tickets(BATCH.of('SM-900','24B')).length"); if(!new RegExp('\\b'+t+'\\b').test(r.textContent)) throw new Error('tickets '+t); });
+step('④ 客诉率 = 客诉/qty，qty 0 为 —',()=>{ const b=E("BATCH.of('SM-900','24B')"); const rate=E(`BATCH.rate(BATCH.of('SM-900','24B'))`);
+  if(Math.abs(rate-E("BATCH.tickets(BATCH.of('SM-900','24B')).length")/b.qty)>1e-9) throw new Error('rate'); if(E("BATCH.rate({qty:0})")!==null) throw new Error('qty0'); });
+step('⑤ 标记规则：种子只有 SM-900/RW-300 24B 为 attention，无 suspect',()=>{ const a=E("state.batches.filter(b=>BATCH.alert(b).kind==='attention').map(b=>b.product+' '+b.code)");
+  if(a.join(',')!=='SM-900 24B,RW-300 24B') throw new Error(a.join(',')); if(E("BATCH.alert(BATCH.of('SM-900','24B')).why").length<8) throw new Error('why');
+  E("state.tickets.push({id:'X1',product:'SM-900',batch:'24A',createdAt:Date.now(),suggest:{type:'factory'},status:'ai',cust:{},timeline:[]});state.tickets.push({id:'X2',product:'SM-900',batch:'24A',createdAt:Date.now(),suggest:{type:'factory'},status:'ai',cust:{},timeline:[]})");
+  const k=E("BATCH.alert(BATCH.of('SM-900','24A')).kind"); if(k!=='suspect') throw new Error('suspect='+k);
+  E("state.tickets=state.tickets.filter(t=>t.id!=='X1'&&t.id!=='X2')"); });
+step('⑥ 点订单数 → 订单页按型号筛选 + 徽章高亮',()=>{ w.go('products'); if(!sub('SM-900')) row('SM-900').querySelector('.batch-toggle').click();
+  E("batchOrdersClick('SM-900','24B')"); if(E('page')!=='orders'||E('orderProd')!=='SM-900') throw new Error(E('page')+'/'+E('orderProd'));
+  setTimeout?0:0; if(!d.querySelector('.batch-tag.sel[data-batch="24B"]')&&!d.querySelector('.batch-tag.sel')) throw new Error('no sel'); E("orderProd='';orderBatchHl=''"); });
+step('⑦ 点客诉数 → 工单页 tf.batch=24B 有行',()=>{ E("batchTicketsClick('SM-900','24B')"); if(E('tf.batch')!=='24B') throw new Error('tf'); const n=d.querySelectorAll('#ttable tr.trow').length; if(!n) throw new Error('0 rows'); });
+step('⑧ 清除批次筛选恢复',()=>{ E("tf.batch=''"); w.refreshTable(); const n=d.querySelectorAll('#ttable tr.trow').length; if(n<=1) throw new Error('not restored'); });
+step('⑨ 工厂只看到自己供应的批次',()=>{ E("role='factory'"); const v=E("BATCH.visibleBatches().map(b=>b.supplier)"); if(!v.length||v.some(x=>x!=='宁波力健机械')) throw new Error(v.join(',')); E("role='brand'"); });
+step('⑩ 二维码页批次档：SM-900 两批次行，24B 已有码',()=>{ w.go('qr'); E("setQrMode('SM-900','batch')"); const c=row2('SM-900'); if(!/24B/.test(c.textContent)||!/24A/.test(c.textContent)) throw new Error('batches');
+  if(!/137/.test(c.textContent)) throw new Error('24B scans'); });
+function row2(id){ return d.querySelector(`.card[data-prod="${id}"]`); }
+step('⑪ 为 24A 生成：新增 1 码、url 含 q= 与 b=24A',()=>{ const n=E('state.qrCodes.length'); E("genQr('SM-900','batch','24A')"); const r=E("state.qrCodes[state.qrCodes.length-1]");
+  if(E('state.qrCodes.length')!==n+1) throw new Error('count'); if(!/q=Q-\d+/.test(r.url)||!/b=24A/.test(r.url)) throw new Error(r.url); if(!E("state.products.find(p=>p.id==='SM-900').qr")) throw new Error('p.qr'); });
+step('⑫ 全部补齐幂等',()=>{ E("genQrAllBatches('SM-900')"); const n=E('state.qrCodes.length'); E("genQrAllBatches('SM-900')"); if(E('state.qrCodes.length')!==n) throw new Error('not idempotent'); });
+step('⑬ 供应商档：SM-900 只有宁波力健 1 行',()=>{ E("setQrMode('SM-900','supplier')"); const c=row2('SM-900').textContent; if((c.match(/宁波力健机械/g)||[]).length>2) throw new Error('dups'); if(/东莞健步/.test(c)) throw new Error('other supplier'); });
+step('⑭ checkBatchConsistency 四情形',()=>{ if(!E('Engine.checkBatchConsistency')({batch:'24A',valid:true},'24B').mismatch) throw new Error('diff');
+  if(E('Engine.checkBatchConsistency')({batch:'24A',valid:true},'24A').mismatch) throw new Error('same'); if(E('Engine.checkBatchConsistency')({batch:'24A',valid:true},null).mismatch) throw new Error('null'); if(E('Engine.checkBatchConsistency')({raw:true},'24B').mismatch) throw new Error('raw'); });
+step('⑮ 工单详情批次徽章 + mismatch 提示',()=>{ E("role='brand';tf.batch=''"); const t=E("state.tickets.find(t=>t.batch&&t.channel==='h5')"); E(`state.tickets.find(t=>t.id==='${t.id}').batchMismatch=true;state.tickets.find(t=>t.id==='${t.id}').qr='Q-0004'`);
+  w.openTicket(t.id); const m=d.body.textContent; if(!/不一致/.test(m)) throw new Error('no mismatch banner'); if(!/Q-0004/.test(m)) throw new Error('no qr source');
+  E(`state.tickets.find(t=>t.id==='${t.id}').batchMismatch=false`); w.closeAll&&w.closeAll(); });
+step('⑯ 二维码计数归因 + 无 qr 计入产品码',()=>{ const before=E("state.qrCodes.find(q=>q.id==='Q-0001').scans"); E("qrAttributeScan({qr:'Q-0001'})"); if(E("state.qrCodes.find(q=>q.id==='Q-0001').scans")!==before+1) throw new Error('match');
+  const b2=E("(state.qrCodes.find(q=>q.product==='SM-700'&&q.scope==='product')||{}).scans"); E("qrAttributeScan({product:'SM-700'})"); if(E("(state.qrCodes.find(q=>q.product==='SM-700'&&q.scope==='product')||{}).scans")!==b2+1) throw new Error('fallback'); });
+step('⑰ 系列/型号单元格不换行（white-space）',()=>{ w.go('products'); const td=row('SM-900').children[1]; const ws=w.getComputedStyle(td).whiteSpace; if(ws!=='nowrap') throw new Error('ws='+ws); });
+console.log(`\n${pass} passed, ${fail} failed; jsdom errors: ${errors.length?errors.slice(0,3).join(' | '):'none'}`);
+process.exit(fail?1:0);

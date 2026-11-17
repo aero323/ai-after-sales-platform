@@ -1,0 +1,11 @@
+const {JSDOM}=require('jsdom'); const fs=require('fs');
+const html=fs.readFileSync('/sessions/lucid-peaceful-hamilton/mnt/AI售后/原型_H5扫码端.html','utf8');
+const dom=new JSDOM(html,{runScripts:'dangerously',url:'http://localhost/h5.html?m=SM-900&go=chat&sn=SM9-24B-00955',pretendToBeVisual:true});
+const w=dom.window; const wait=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{ await wait(150);
+  console.log('status before:',w.eval('ticket.status'), 'stage', w.eval('stage'));
+  w.document.getElementById('ta').value='跑带偏了，怎么润滑'; w.sendMsg();
+  await wait(1600);
+  console.log('kb',w.eval('ticket.kbId'),'status',w.eval('ticket.status'),'stage',w.eval('stage'));
+  console.log((w.document.getElementById('chat').textContent).slice(0,400));
+  w.close(); process.exit(0); })();

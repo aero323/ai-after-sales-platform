@@ -1,0 +1,34 @@
+// 知识图谱回归：node kgtest.js（jsdom 没有 canvas 实现，KG.mount 走 noDraw 分支，只验证数据与交互逻辑）
+const {JSDOM,VirtualConsole}=require('jsdom'); const fs=require('fs'); const path=require('path');
+const html=fs.readFileSync(path.join(__dirname,'..','原型_品牌方后台.html'),'utf8');
+const errors=[]; const vc=new VirtualConsole(); vc.on('jsdomError',e=>errors.push(e.message));
+const dom=new JSDOM(html,{runScripts:'dangerously',url:'http://localhost/admin.html',pretendToBeVisual:true,virtualConsole:vc});
+const w=dom.window, d=w.document; const E=c=>w.eval(c); const S=()=>E('state');
+w.HTMLCanvasElement.prototype.getContext=()=>null; w.Element.prototype.scrollIntoView=function(){};
+let pass=0, fail=0;
+const step=(name,fn)=>{ try{ fn(); pass++; console.log('ok  ',name); }catch(e){ fail++; console.log('FAIL',name,'→',e.message.split('\n')[0]); } };
+const text=()=>d.getElementById('main').textContent.replace(/\s+/g,' ');
+const nodes=()=>E('KG._nodes'); const byType=t=>nodes().filter(n=>n.type===t);
+
+step('kb page renders graph panel instead of 3 kpi cards',()=>{ w.go('kb'); if(!d.querySelector('.kg')) throw new Error('no .kg'); if(d.querySelectorAll('.card.kpi').length) throw new Error('kpi cards still there'); if(!d.getElementById('kg_cv')) throw new Error('no canvas'); });
+step('rail lists all products + 全部',()=>{ const btns=[...d.querySelectorAll('.kg-p')]; if(btns.length!==S().products.length+1) throw new Error(btns.length); if(!btns[0].classList.contains('on')) throw new Error('全部 not selected'); });
+step('stats line keeps the 3 old numbers',()=>{ const t=d.querySelector('.kg-stat').textContent; const s=S(); if(!t.includes(`${s.kbFiles.length} 份资料`)||!t.includes(`${E('Engine.KB.length')} 条知识条目`)||!t.includes(`术语 ${s.terms.length} 条`)) throw new Error(t); });
+step('model: one node per product / entry / file / term, parts deduped',()=>{ const s=S();
+  if(byType('product').length!==s.products.length) throw new Error('products');
+  if(byType('entry').length!==E('Engine.KB.length')) throw new Error('entries');
+  if(byType('file').length!==s.kbFiles.length) throw new Error('files');
+  if(byType('term').length!==s.terms.filter(t=>t.zh).length) throw new Error('terms');
+  const parts=new Set(E('Engine.KB').filter(k=>k.part).map(k=>String(k.part))); if(byType('part').length!==parts.size) throw new Error('parts'); });
+step('gap nodes == AI缺口洞察 rules',()=>{ const g=E('KG.gapsAll()'); if(byType('gap').length!==g.length) throw new Error('count'); const keys=g.map(x=>x.key).sort().join(); if(!keys.includes('TR-650:3d')||!keys.includes('CB-1200:files')||!keys.includes('RW-300:weight')) throw new Error(keys); });
+step('every entry links to its product (or 通用 hub)',()=>{ const edges=E('KG._edges'); for(const n of byType('entry')){ const want=n.k.product==='*'?'hub':'p-'+n.k.product; if(!edges.some(e=>e.kind==='own'&&((e.a===n.id&&e.b===want)||(e.b===n.id&&e.a===want)))) throw new Error(n.id); } });
+step('rail click → focus product, tabs filter follow',()=>{ d.querySelector('.kg-p[data-p="SM-900"]').click(); if(E('KG._sel')!=='SM-900') throw new Error('sel'); if(!d.querySelector('.kg-p[data-p="SM-900"]').classList.contains('on')) throw new Error('rail');
+  const t=d.querySelector('.tabs').textContent; const nf=S().kbFiles.filter(k=>k.p==='SM-900').length, ne=E("Engine.KB.filter(k=>k.product==='SM-900').length"); if(!t.includes(`(${nf})`)||!t.includes(`(${ne})`)) throw new Error(t);
+  const dim=nodes().filter(n=>n.type==='product'&&n.p.id!=='SM-900'); if(dim.some(n=>n.focus)) throw new Error('others still focused'); if(!nodes().find(n=>n.id==='e-assembly').focus) throw new Error('通用 should stay focused'); });
+step('src edges appear only in focus mode',()=>{ if(!E('KG._edges').some(e=>e.kind==='src')) throw new Error('no src edges'); E("KG.setSel('all')"); if(E('KG._edges').some(e=>e.kind==='src')) throw new Error('src edges in overview'); });
+step('entries tab lists only the focused product',()=>{ E("KG.setSel('TR-650')"); E("kbTab='entries'"); w.render(); const n=d.querySelectorAll('.kbe').length; if(n!==E("Engine.KB.filter(k=>k.product==='TR-650').length")) throw new Error(n); if(!d.getElementById('kbe_e07')) throw new Error('no id'); E("KG.setSel('all')"); E("kbTab='files'"); w.render(); if(d.querySelectorAll('.kbe').length) throw new Error('entries tab still open'); });
+step('file rows carry ids for graph → list jump',()=>{ const f=S().kbFiles[0]; if(!d.getElementById('kbrow_'+f.id)) throw new Error('no row id'); });
+step('upload adds a parsing node, then settles',()=>{ const before=byType('file').length; w.uploadKB([new w.File(['x'],'SM-700 爆炸图与零件清单.xlsx')]); const nf=byType('file'); if(nf.length!==before+1) throw new Error(nf.length); const nn=nf.find(n=>n.file.n.includes('SM-700 爆炸图')); if(nn.file.st!=='解析中'||nn.grp!=='SM-700') throw new Error(JSON.stringify(nn.file)); });
+step('tooltip text for entry / gap',()=>{ const e=nodes().find(n=>n.id==='e-cable'); const t=E('KG.nodeTip')(e); if(!/钢缆磨损/.test(t)||!/命中 \d+ 次/.test(t)||!/安全件/.test(t)) throw new Error(t); const g=byType('gap')[0]; if(!/缺口/.test(E('KG.nodeTip')(g))) throw new Error('gap tip'); });
+step('other pages unaffected',()=>{ for(const p of ['agent','tickets','products','manuals','qr','orders','analytics','parts','settings']){ w.go(p); if(!d.getElementById('main').children.length) throw new Error(p); } w.go('kb'); if(!d.querySelector('.kg')) throw new Error('kb lost'); });
+setTimeout(()=>{ step('parsing node settled to 已入库',()=>{ const nn=byType('file').find(n=>n.file.n.includes('SM-700 爆炸图')); if(!nn||nn.file.st!=='已入库') throw new Error(nn&&nn.file.st); });
+  console.log(`\n${pass} passed, ${fail} failed; errors: ${errors.length?errors.join(' | '):'none'}`); process.exit(fail?1:0); },3200);
